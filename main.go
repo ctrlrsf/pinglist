@@ -1,13 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"time"
 
 	"github.com/tatsushid/go-fastping"
 )
+
+const listenPort = ":8000"
 
 var hostList []string
 var pingInterval = 5 * time.Second
@@ -29,7 +33,10 @@ func main() {
 		usage()
 	}
 
-	pingLoop()
+	go pingLoop()
+
+	startServer()
+
 }
 
 // Ping all hosts and then sleep some amount of time, repeat
@@ -89,4 +96,21 @@ func pingHost(host string, maxRtt time.Duration) (bool, time.Duration, error) {
 	}
 
 	return isUp, retRtt, nil
+}
+
+// Handle "/api/listhosts"
+func apiListHandler(w http.ResponseWriter, r *http.Request) {
+	jsonHostsList, err := json.Marshal(hostList)
+
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "error, try again later.", 500)
+	}
+	fmt.Fprintln(w, string(jsonHostsList))
+}
+
+// Start HTTP server
+func startServer() {
+	http.HandleFunc("/api/listhosts", apiListHandler)
+	http.ListenAndServe(listenPort, nil)
 }
