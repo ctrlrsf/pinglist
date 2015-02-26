@@ -1,4 +1,4 @@
-package main
+package pinglist
 
 import (
 	"encoding/json"
@@ -13,9 +13,11 @@ import (
 
 const listenPort = ":8000"
 
-var hostList []string
+//var hostList []string
 var pingInterval = 5 * time.Second
 var defaultTimeout = 2 * time.Second
+
+var hostRegistry *HostRegistry
 
 const Usage = `Usage:
   pinglist [HOSTS...]
@@ -27,10 +29,15 @@ func usage() {
 }
 
 func main() {
-	if len(os.Args[1:]) > 0 {
-		hostList = os.Args[1:]
-	} else {
+	if len(os.Args[1:]) == 0 {
 		usage()
+	}
+
+	hostRegistry = NewHostRegistry()
+
+	hostArgs := os.Args[1:]
+	for i := range hostArgs {
+		hostRegistry.RegisterAddress(hostArgs[i])
 	}
 
 	go pingLoop()
@@ -44,12 +51,12 @@ func pingLoop() {
 	// Loop indefinitely
 	for {
 		// Ping each host
-		for i := range hostList {
-			host := hostList[i]
+		for i := range hostRegistry.hostList {
+			host := hostRegistry.hostList[i]
 
 			fmt.Printf("Pinging: %s\n", host)
 
-			isUp, rtt, err := pingHost(host, defaultTimeout)
+			isUp, rtt, err := pingHost(host.Address, defaultTimeout)
 
 			if err != nil {
 				fmt.Println(err)
@@ -100,7 +107,7 @@ func pingHost(host string, maxRtt time.Duration) (bool, time.Duration, error) {
 
 // Handle "/api/listhosts"
 func apiListHandler(w http.ResponseWriter, r *http.Request) {
-	jsonHostsList, err := json.Marshal(hostList)
+	jsonHostsList, err := json.Marshal(hostRegistry.hostList)
 
 	if err != nil {
 		fmt.Println(err)
