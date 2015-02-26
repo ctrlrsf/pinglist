@@ -13,7 +13,6 @@ import (
 
 const listenPort = ":8000"
 
-//var hostList []string
 var pingInterval = 5 * time.Second
 var defaultTimeout = 2 * time.Second
 
