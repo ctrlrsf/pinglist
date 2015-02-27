@@ -1,4 +1,4 @@
-package pinglist
+package main
 
 // Host holds information about a host that will be pinged, such as
 // IP address or hostname.

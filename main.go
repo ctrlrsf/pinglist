@@ -1,4 +1,4 @@
-package pinglist
+package main
 
 import (
 	"encoding/json"
@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/tatsushid/go-fastping"
 )
 
@@ -105,7 +106,7 @@ func pingHost(host string, maxRtt time.Duration) (bool, time.Duration, error) {
 }
 
 // Handle "/api/listhosts"
-func apiListHandler(w http.ResponseWriter, r *http.Request) {
+func apiListHostsHandler(w http.ResponseWriter, r *http.Request) {
 	jsonHostsList, err := json.Marshal(hostRegistry.hostList)
 
 	if err != nil {
@@ -115,8 +116,34 @@ func apiListHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, string(jsonHostsList))
 }
 
+// Handle "/api/addhost"
+func apiAddHostHandler(w http.ResponseWriter, r *http.Request) {
+	address := r.FormValue("address")
+	if address == "" {
+		http.Error(w, "address format error", 500)
+		return
+	}
+
+	// Check if we can parse IP
+	ip := net.ParseIP(address)
+	// Check if we can resolve hostname
+	_, lookupErr := net.LookupHost(address)
+
+	if ip == nil && lookupErr != nil {
+		http.Error(w, "invalid address", 500)
+		return
+	}
+
+	fmt.Fprintln(w, "Success")
+	hostRegistry.RegisterAddress(address)
+}
+
 // Start HTTP server
 func startServer() {
-	http.HandleFunc("/api/listhosts", apiListHandler)
+	r := mux.NewRouter()
+
+	r.HandleFunc("/api/addhost", apiAddHostHandler)
+	r.HandleFunc("/api/listhosts", apiListHostsHandler)
+	http.Handle("/", r)
 	http.ListenAndServe(listenPort, nil)
 }
