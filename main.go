@@ -8,41 +8,44 @@ import (
 	"os"
 	"time"
 
+	"github.com/codegangsta/cli"
 	"github.com/gorilla/mux"
 	"github.com/tatsushid/go-fastping"
 )
-
-const listenPort = ":8000"
 
 var pingInterval = 5 * time.Second
 var defaultTimeout = 2 * time.Second
 
 var hostRegistry *HostRegistry
 
-const Usage = `Usage:
-  pinglist [HOSTS...]
-`
-
-func usage() {
-	fmt.Println(Usage)
-	os.Exit(1)
-}
-
 func main() {
-	if len(os.Args[1:]) == 0 {
-		usage()
+	app := cli.NewApp()
+	app.Name = "pinglist"
+	app.Author = "Rene Fragoso"
+	app.Email = "ctrlrsf@gmail.com"
+	app.Usage = "Pinglist server"
+
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "http",
+			Value: ":8000",
+		},
 	}
 
-	hostRegistry = NewHostRegistry()
+	app.Action = func(c *cli.Context) {
+		hostRegistry = NewHostRegistry()
 
-	hostArgs := os.Args[1:]
-	for i := range hostArgs {
-		hostRegistry.RegisterAddress(hostArgs[i])
+		hostArgs := c.Args()
+		for i := range hostArgs {
+			hostRegistry.RegisterAddress(hostArgs[i])
+		}
+
+		go pingLoop()
+
+		startServer(c.String("http"))
 	}
 
-	go pingLoop()
-
-	startServer()
+	app.Run(os.Args)
 
 }
 
@@ -139,11 +142,11 @@ func apiAddHostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Start HTTP server
-func startServer() {
+func startServer(listenIpPort string) {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/addhost", apiAddHostHandler)
 	r.HandleFunc("/api/listhosts", apiListHostsHandler)
 	http.Handle("/", r)
-	http.ListenAndServe(listenPort, nil)
+	http.ListenAndServe(listenIpPort, nil)
 }
