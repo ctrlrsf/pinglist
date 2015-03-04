@@ -42,7 +42,7 @@ func main() {
 
 		go pingLoop()
 
-		startServer(c.String("http"))
+		startHttpServer(c.String("http"))
 	}
 
 	app.Run(os.Args)
@@ -142,7 +142,7 @@ func apiAddHostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Start HTTP server
-func startServer(listenIpPort string) {
+func startHttpServer(listenIpPort string) {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/addhost", apiAddHostHandler)
