@@ -1,5 +1,7 @@
 package main
 
+import "net"
+
 // Host holds information about a host that will be pinged, such as
 // IP address or hostname.
 type Host struct {
@@ -37,4 +39,18 @@ func (hr *HostRegistry) contains(address string) bool {
 		}
 	}
 	return false
+}
+
+// Validate address is an IP or hostname
+func ValidIpOrHost(address string) bool {
+	// Check if we can parse IP
+	ip := net.ParseIP(address)
+	// Check if we can resolve hostname
+	_, lookupErr := net.LookupHost(address)
+
+	if ip == nil && lookupErr != nil {
+		return false
+	} else {
+		return true
+	}
 }
