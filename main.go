@@ -1,15 +1,15 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/ant0ine/go-json-rest/rest"
 	"github.com/codegangsta/cli"
-	"github.com/gorilla/mux"
 	"github.com/tatsushid/go-fastping"
 )
 
@@ -108,45 +108,28 @@ func pingHost(host string, maxRtt time.Duration) (bool, time.Duration, error) {
 	return isUp, retRtt, nil
 }
 
-// Handle "/api/listhosts"
-func apiListHostsHandler(w http.ResponseWriter, r *http.Request) {
-	jsonHostsList, err := json.Marshal(hostRegistry.hostList)
-
-	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "error, try again later.", 500)
-	}
-	fmt.Fprintln(w, string(jsonHostsList))
-}
-
-// Handle "/api/addhost"
-func apiAddHostHandler(w http.ResponseWriter, r *http.Request) {
-	address := r.FormValue("address")
-	if address == "" {
-		http.Error(w, "address format error", 500)
-		return
-	}
-
-	// Check if we can parse IP
-	ip := net.ParseIP(address)
-	// Check if we can resolve hostname
-	_, lookupErr := net.LookupHost(address)
-
-	if ip == nil && lookupErr != nil {
-		http.Error(w, "invalid address", 500)
-		return
-	}
-
-	fmt.Fprintln(w, "Success")
-	hostRegistry.RegisterAddress(address)
-}
-
 // Start HTTP server
 func startHttpServer(listenIpPort string) {
-	r := mux.NewRouter()
+	api := rest.NewApi()
+	api.Use(rest.DefaultDevStack...)
+	router, err := rest.MakeRouter(
+		&rest.Route{"GET", "/hosts", func(w rest.ResponseWriter, r *rest.Request) {
+			w.WriteJson(&hostRegistry.hostList)
+		}},
+		&rest.Route{"PUT", "/hosts/#address", func(w rest.ResponseWriter, r *rest.Request) {
+			address := r.PathParam("address")
+			if !ValidIpOrHost(address) {
+				rest.Error(w, "Invalid address or format", http.StatusInternalServerError)
+				return
+			}
+			hostRegistry.RegisterAddress(address)
+		}},
+	)
 
-	r.HandleFunc("/api/addhost", apiAddHostHandler)
-	r.HandleFunc("/api/listhosts", apiListHostsHandler)
-	http.Handle("/", r)
-	http.ListenAndServe(listenIpPort, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	api.SetApp(router)
+
+	log.Fatal(http.ListenAndServe(listenIpPort, api.MakeHandler()))
 }
