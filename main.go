@@ -131,5 +131,9 @@ func startHttpServer(listenIpPort string) {
 	}
 	api.SetApp(router)
 
-	log.Fatal(http.ListenAndServe(listenIpPort, api.MakeHandler()))
+	http.Handle("/api/", http.StripPrefix("/api", api.MakeHandler()))
+
+	http.Handle("/", http.FileServer(http.Dir("static/")))
+
+	log.Fatal(http.ListenAndServe(listenIpPort, nil))
 }
