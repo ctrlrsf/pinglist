@@ -7,3 +7,4 @@ Simple HTTP based server to ping list of hosts
 - Monitor uptime and latency of many hosts (10s, 100s)
 - Primarily ICMP ping based monitoring
 - Support adding and removing hosts via simple web UI
+- Web UI will show auto updating status of hosts
