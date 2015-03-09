@@ -24,17 +24,17 @@ func TestValidIpOrHost(t *testing.T) {
 
 	for i, _ := range validHosts {
 		host := validHosts[i]
-		result := ValidIpOrHost(host)
+		result := ValidIPOrHost(host)
 		if result != true {
-			t.Error("ValidIpOrHost(%v) returned false, wanted true.", host)
+			t.Error("ValidIPOrHost(%v) returned false, wanted true.", host)
 		}
 	}
 
 	for i, _ := range invalidHosts {
 		host := invalidHosts[i]
-		result := ValidIpOrHost(host)
+		result := ValidIPOrHost(host)
 		if result != false {
-			t.Error("ValidIpOrHost(%v) returned true, wanted false.", host)
+			t.Error("ValidIPOrHost(%v) returned true, wanted false.", host)
 		}
 	}
 

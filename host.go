@@ -13,7 +13,7 @@ type HostRegistry struct {
 	hostList []Host
 }
 
-// NewHostRegister returns new HostRegistry where hosts can later be added.
+// NewHostRegistry returns new HostRegistry where hosts can later be added.
 func NewHostRegistry() *HostRegistry {
 	return &HostRegistry{}
 }
@@ -41,8 +41,8 @@ func (hr *HostRegistry) contains(address string) bool {
 	return false
 }
 
-// Validate address is an IP or hostname
-func ValidIpOrHost(address string) bool {
+// ValidIPOrHost validates address is an IP or hostname
+func ValidIPOrHost(address string) bool {
 	// Check if we can parse IP
 	ip := net.ParseIP(address)
 	// Check if we can resolve hostname

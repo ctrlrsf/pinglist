@@ -113,7 +113,7 @@ func startHttpServer(listenIpPort string) {
 		}},
 		&rest.Route{"PUT", "/hosts/#address", func(w rest.ResponseWriter, r *rest.Request) {
 			address := r.PathParam("address")
-			if !ValidIpOrHost(address) {
+			if !ValidIPOrHost(address) {
 				rest.Error(w, "Invalid address or format", http.StatusInternalServerError)
 				return
 			}
