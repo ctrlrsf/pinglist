@@ -45,12 +45,19 @@ func (hr *HostRegistry) contains(address string) bool {
 func ValidIPOrHost(address string) bool {
 	// Check if we can parse IP
 	ip := net.ParseIP(address)
+
+	// is valid IP address
+	if ip != nil {
+		return true
+	}
+
 	// Check if we can resolve hostname
 	_, lookupErr := net.LookupHost(address)
 
-	if ip == nil && lookupErr != nil {
-		return false
-	} else {
+	// is valid hostname
+	if lookupErr == nil {
 		return true
 	}
+
+	return false
 }
