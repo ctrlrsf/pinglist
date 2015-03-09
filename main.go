@@ -35,11 +35,6 @@ func main() {
 	app.Action = func(c *cli.Context) {
 		hostRegistry = NewHostRegistry()
 
-		hostArgs := c.Args()
-		for i := range hostArgs {
-			hostRegistry.RegisterAddress(hostArgs[i])
-		}
-
 		go pingLoop()
 
 		startHttpServer(c.String("http"))
