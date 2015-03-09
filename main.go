@@ -78,8 +78,8 @@ func pingLoop() {
 //
 // Returns whether host was up, latency, and/or any error
 func pingHost(host string, maxRtt time.Duration) (bool, time.Duration, error) {
-	var retRtt time.Duration = 0
-	var isUp bool = false
+	var retRtt time.Duration
+	var isUp = false
 
 	p := fastping.NewPinger()
 	p.MaxRTT = maxRtt
