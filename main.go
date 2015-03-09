@@ -37,7 +37,7 @@ func main() {
 
 		go pingLoop()
 
-		startHttpServer(c.String("http"))
+		startHTTPServer(c.String("http"))
 	}
 
 	app.Run(os.Args)
@@ -104,7 +104,7 @@ func pingHost(host string, maxRtt time.Duration) (bool, time.Duration, error) {
 }
 
 // Start HTTP server
-func startHttpServer(listenIpPort string) {
+func startHTTPServer(listenIPPort string) {
 	api := rest.NewApi()
 	api.Use(rest.DefaultDevStack...)
 	router, err := rest.MakeRouter(
@@ -130,5 +130,5 @@ func startHttpServer(listenIpPort string) {
 
 	http.Handle("/", http.FileServer(http.Dir("static/")))
 
-	log.Fatal(http.ListenAndServe(listenIpPort, nil))
+	log.Fatal(http.ListenAndServe(listenIPPort, nil))
 }
