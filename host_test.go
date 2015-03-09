@@ -22,7 +22,7 @@ func TestValidIpOrHost(t *testing.T) {
 	validHosts := []string{"1.1.1.1", "2.2.2.2", "google.com", "apple.com"}
 	invalidHosts := []string{"./4.2423", "x$yz", "28 42klkfjs"}
 
-	for i, _ := range validHosts {
+	for i := range validHosts {
 		host := validHosts[i]
 		result := ValidIPOrHost(host)
 		if result != true {
@@ -30,7 +30,7 @@ func TestValidIpOrHost(t *testing.T) {
 		}
 	}
 
-	for i, _ := range invalidHosts {
+	for i := range invalidHosts {
 		host := invalidHosts[i]
 		result := ValidIPOrHost(host)
 		if result != false {
