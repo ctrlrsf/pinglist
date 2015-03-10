@@ -1,5 +1,60 @@
 <html>
+  <head>
+    <script src="http://fb.me/react-0.12.2.js"></script>
+    <script src="http://fb.me/JSXTransformer-0.12.2.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+  </head>
   <body>
     <h1>Pinglist</h1>
+
+    <div id="content"></div>
+
+    <script type="text/jsx">
+var HostList = React.createClass({
+  getInitialState: function() {
+    return {
+      hostList: []
+    };
+  },
+
+  componentDidMount: function() {
+    $.get(this.props.source, function(result) {
+      if (result !== null) {
+        var hostList = result
+        if (this.isMounted()) {
+          this.setState({
+            hostList: hostList
+          });
+        }
+      }
+    }.bind(this));
+  },
+
+  render: function() {
+    var hostLiNodes = this.state.hostList.map(function (host) {
+      return (
+        <Host key={host.Address} address={host.Address} />
+      );
+    });
+    return (
+      <ul>
+      {hostLiNodes}
+      </ul>
+    );
+  }
+});
+
+var Host = React.createClass({
+  render: function() {
+    return (
+      <li>{this.props.address}</li>
+    );
+  }
+});
+
+var apiUrl = window.location.href + "api/hosts"
+console.log(apiUrl)
+React.render(<HostList source={apiUrl} />, document.getElementById("content"))
+    </script>
   </body>
 </html>
