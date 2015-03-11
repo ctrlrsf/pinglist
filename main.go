@@ -50,9 +50,9 @@ func pingLoop() {
 	for {
 		// Ping each host
 		for i := range hostRegistry.hostList {
-			host := hostRegistry.hostList[i]
+			host := &hostRegistry.hostList[i]
 
-			fmt.Printf("Pinging: %s\n", host)
+			fmt.Printf("Pinging: %s\n", host.Address)
 
 			isUp, rtt, err := pingHost(host.Address, defaultTimeout)
 
@@ -62,6 +62,8 @@ func pingLoop() {
 
 			if isUp {
 				fmt.Printf("Host is up: RTT=%s\n", rtt)
+				host.Status = OnlineStatus
+				host.Latency = rtt
 			} else {
 				fmt.Println("Host is down: timeout")
 			}

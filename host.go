@@ -1,11 +1,21 @@
 package main
 
-import "net"
+import (
+	"net"
+	"time"
+)
+
+const (
+	OfflineStatus = iota
+	OnlineStatus
+)
 
 // Host holds information about a host that will be pinged, such as
 // IP address or hostname.
 type Host struct {
 	Address string
+	Latency time.Duration
+	Status  byte
 }
 
 // HostRegistry keeps track of Hosts that will be pinged.
