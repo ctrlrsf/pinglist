@@ -1,13 +1,14 @@
 <html>
   <head>
-    <script src="http://fb.me/react-0.12.2.js"></script>
-    <script src="http://fb.me/JSXTransformer-0.12.2.js"></script>
+    <script src="http://fb.me/react-0.13.0.js"></script>
+    <script src="http://fb.me/JSXTransformer-0.13.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
   </head>
   <body>
     <h1>Pinglist</h1>
 
-    <div id="content"></div>
+    <div id="hostform"></div>
+    <div id="hostlist"></div>
 
     <script type="text/jsx">
 var formatLatency = function(microsecs) {
@@ -87,9 +88,42 @@ var Host = React.createClass({
   }
 });
 
-var apiUrl = window.location.href + "api/hosts"
+var HostAddForm = React.createClass({
+  handleSubmit: function(e) {
+    e.preventDefault();
+    var address = React.findDOMNode(this.refs.address).value.trim();
 
-React.render(<HostList source={apiUrl} />, document.getElementById("content"))
+    if (! address) {
+      return;
+    }
+
+    var putUrl=this.props.url + "/" + address
+
+    $.ajax({
+      url: putUrl,
+      type: "PUT",
+      success: function(result) {
+        React.findDOMNode(this.refs.address).value = "";
+      }.bind(this)
+    });
+
+    return;
+  },
+
+  render: function() {
+    return (
+      <form className="hostAddForm" onSubmit={this.handleSubmit}>
+        <input type="text" placeholder="IP or hostname" ref="address" />
+        <input type="submit" value="Add host" />
+      </form>
+    );
+  },
+});
+
+var apiUrl = "http://" + window.location.host + "/api/hosts"
+
+React.render(<HostAddForm url={apiUrl} />, document.getElementById("hostform"))
+React.render(<HostList source={apiUrl} />, document.getElementById("hostlist"))
     </script>
   </body>
 </html>
