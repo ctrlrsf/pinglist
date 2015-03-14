@@ -3,6 +3,14 @@
     <script src="http://fb.me/react-0.13.0.js"></script>
     <script src="http://fb.me/JSXTransformer-0.13.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
   </head>
   <body>
     <h1>Pinglist</h1>
@@ -81,8 +89,18 @@ var Host = React.createClass({
     }
 
     return (
-      <div style={divStyle}>
-      {this.props.address} - {formatStatus(this.props.status)} - {formatLatency(this.props.latency)}
+      <div className="container" style={{width: "500px"}}>
+        <div style={divStyle} class="row">
+          <div className="col-md-4">
+            {this.props.address}
+          </div>
+          <div className="col-md-4">
+            {formatStatus(this.props.status)}
+          </div>
+          <div className="col-md-4">
+            {formatLatency(this.props.latency)}
+          </div>
+        </div>
       </div>
     );
   }
