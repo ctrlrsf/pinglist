@@ -60,7 +60,7 @@ var HostList = React.createClass({
   render: function() {
     var hostLiNodes = this.state.hostList.map(function (host) {
       return (
-        <Host key={host.Address} address={host.Address} status={host.Status} latency={host.Latency} />
+        <Host key={host.Address} address={host.Address} description={host.Description} status={host.Status} latency={host.Latency} />
       );
     });
     return (
@@ -95,9 +95,12 @@ var Host = React.createClass({
             {this.props.address}
           </div>
           <div className="col-md-4">
+            {this.props.description}
+          </div>
+          <div className="col-md-2">
             {formatStatus(this.props.status)}
           </div>
-          <div className="col-md-4">
+          <div className="col-md-2">
             {formatLatency(this.props.latency)}
           </div>
         </div>
@@ -110,16 +113,29 @@ var HostAddForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
     var address = React.findDOMNode(this.refs.address).value.trim();
+    var description = React.findDOMNode(this.refs.description).value.trim();
+
+    React.findDOMNode(this.refs.address).value = ""
+    React.findDOMNode(this.refs.description).value = ""
+
 
     if (! address) {
       return;
     }
 
-    var putUrl=this.props.url + "/" + address
+    var putUrl = this.props.url + "/" + address
+
+    var hostJson = {
+      "Address" : address,
+      "Description" : description,
+    }
 
     $.ajax({
       url: putUrl,
       type: "PUT",
+      contentType: "application/json",
+      data: JSON.stringify(hostJson),
+      dataType: "json",
       success: function(result) {
         React.findDOMNode(this.refs.address).value = "";
       }.bind(this)
@@ -132,6 +148,7 @@ var HostAddForm = React.createClass({
     return (
       <form className="hostAddForm" onSubmit={this.handleSubmit}>
         <input type="text" placeholder="IP or hostname" ref="address" />
+        <input type="text" placeholder="Description" ref="description" />
         <input type="submit" value="Add host" />
       </form>
     );

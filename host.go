@@ -13,9 +13,10 @@ const (
 // Host holds information about a host that will be pinged, such as
 // IP address or hostname.
 type Host struct {
-	Address string
-	Latency time.Duration
-	Status  byte
+	Address     string
+	Latency     time.Duration
+	Status      byte
+	Description string
 }
 
 // HostRegistry keeps track of Hosts that will be pinged.
@@ -39,6 +40,16 @@ func (hr *HostRegistry) RegisterAddress(address string) {
 	host := &Host{Address: address}
 
 	hr.hostList = append(hr.hostList, *host)
+}
+
+// RegisterHost adds a host to the registry
+func (hr *HostRegistry) RegisterHost(h *Host) {
+	// Don't add duplicate address, just return if already exists.
+	if hr.contains(h.Address) {
+		return
+	}
+
+	hr.hostList = append(hr.hostList, *h)
 }
 
 // Check if host list already contains a host entry with same address.

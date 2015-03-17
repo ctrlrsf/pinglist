@@ -18,6 +18,11 @@ var defaultTimeout = 2 * time.Second
 
 var hostRegistry *HostRegistry
 
+type HostJson struct {
+	Address     string
+	Description string
+}
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "pinglist"
@@ -114,12 +119,31 @@ func startHTTPServer(listenIPPort string) {
 			w.WriteJson(&hostRegistry.hostList)
 		}},
 		&rest.Route{"PUT", "/hosts/#address", func(w rest.ResponseWriter, r *rest.Request) {
-			address := r.PathParam("address")
-			if !ValidIPOrHost(address) {
+
+			hostJson := HostJson{}
+			err := r.DecodeJsonPayload(&hostJson)
+			if err != nil {
+				rest.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if hostJson.Address == "" {
+				rest.Error(w, "Address required", 400)
+				return
+			}
+
+			if len(hostJson.Description) > 200 {
+				rest.Error(w, "Description too long", 400)
+				return
+			}
+
+			if !ValidIPOrHost(hostJson.Address) {
 				rest.Error(w, "Invalid address or format", http.StatusInternalServerError)
 				return
 			}
-			hostRegistry.RegisterAddress(address)
+
+			h := &Host{Address: hostJson.Address, Description: hostJson.Description}
+			hostRegistry.RegisterHost(h)
 		}},
 	)
 
