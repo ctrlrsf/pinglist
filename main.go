@@ -54,9 +54,7 @@ func pingLoop() {
 	// Loop indefinitely
 	for {
 		// Ping each host
-		for i := range hostRegistry.hostList {
-			host := &hostRegistry.hostList[i]
-
+		for _, host := range hostRegistry.hosts {
 			fmt.Printf("Pinging: %s\n", host.Address)
 
 			isUp, rtt, err := pingHost(host.Address, defaultTimeout)
@@ -116,7 +114,7 @@ func startHTTPServer(listenIPPort string) {
 	api.Use(rest.DefaultDevStack...)
 	router, err := rest.MakeRouter(
 		&rest.Route{"GET", "/hosts", func(w rest.ResponseWriter, r *rest.Request) {
-			w.WriteJson(&hostRegistry.hostList)
+			w.WriteJson(&hostRegistry.hosts)
 		}},
 		&rest.Route{"PUT", "/hosts/#address", func(w rest.ResponseWriter, r *rest.Request) {
 

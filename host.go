@@ -21,12 +21,14 @@ type Host struct {
 
 // HostRegistry keeps track of Hosts that will be pinged.
 type HostRegistry struct {
-	hostList []Host
+	hosts map[string]Host
 }
 
 // NewHostRegistry returns new HostRegistry where hosts can later be added.
 func NewHostRegistry() *HostRegistry {
-	return &HostRegistry{}
+	hr := &HostRegistry{}
+	hr.hosts = make(map[string]Host)
+	return hr
 }
 
 // RegisterAddress creates a new Host with specified address and adds it
@@ -39,7 +41,7 @@ func (hr *HostRegistry) RegisterAddress(address string) {
 
 	host := &Host{Address: address}
 
-	hr.hostList = append(hr.hostList, *host)
+	hr.hosts[address] = *host
 }
 
 // RegisterHost adds a host to the registry
@@ -49,17 +51,13 @@ func (hr *HostRegistry) RegisterHost(h *Host) {
 		return
 	}
 
-	hr.hostList = append(hr.hostList, *h)
+	hr.hosts[h.Address] = *h
 }
 
 // Check if host list already contains a host entry with same address.
 func (hr *HostRegistry) contains(address string) bool {
-	for _, host := range hr.hostList {
-		if host.Address == address {
-			return true
-		}
-	}
-	return false
+	_, ok := hr.hosts[address]
+	return ok
 }
 
 // ValidIPOrHost validates address is an IP or hostname
