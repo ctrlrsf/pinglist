@@ -7,14 +7,14 @@ func TestHostRegistryContains(t *testing.T) {
 
 	ip := "1.1.1.1"
 	hr.RegisterAddress(ip)
-	result := hr.contains(ip)
+	result := hr.Contains(ip)
 	if result == false {
-		t.Error("contains() returned false, wanted true.")
+		t.Error("Contains() returned false, wanted true.")
 	}
 
-	result2 := hr.contains("2.2.2.2")
+	result2 := hr.Contains("2.2.2.2")
 	if result2 == true {
-		t.Error("contains() returned true, wanted false.")
+		t.Error("Contains() returned true, wanted false.")
 	}
 }
 

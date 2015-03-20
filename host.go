@@ -35,7 +35,7 @@ func NewHostRegistry() *HostRegistry {
 // to the HostRegistry.
 func (hr *HostRegistry) RegisterAddress(address string) {
 	// Don't add duplicate address, just return if already exists.
-	if hr.contains(address) {
+	if hr.Contains(address) {
 		return
 	}
 
@@ -47,20 +47,20 @@ func (hr *HostRegistry) RegisterAddress(address string) {
 // RegisterHost adds a host to the registry
 func (hr *HostRegistry) RegisterHost(h *Host) {
 	// Don't add duplicate address, just return if already exists.
-	if hr.contains(h.Address) {
+	if hr.Contains(h.Address) {
 		return
 	}
 
 	hr.hosts[h.Address] = *h
 }
 
-// Check if host list already contains a host entry with same address.
-func (hr *HostRegistry) contains(address string) bool {
+// Contains checks if host list already contains a host entry with same address.
+func (hr *HostRegistry) Contains(address string) bool {
 	_, ok := hr.hosts[address]
 	return ok
 }
 
-// RemoveHost removes a host from the registry
+// RemoveHost removes a host from the registry.
 func (hr *HostRegistry) RemoveHost(address string) {
 	delete(hr.hosts, address)
 }
