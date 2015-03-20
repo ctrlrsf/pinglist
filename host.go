@@ -60,6 +60,11 @@ func (hr *HostRegistry) contains(address string) bool {
 	return ok
 }
 
+// RemoveHost removes a host from the registry
+func (hr *HostRegistry) RemoveHost(address string) {
+	delete(hr.hosts, address)
+}
+
 // ValidIPOrHost validates address is an IP or hostname
 func ValidIPOrHost(address string) bool {
 	// Check if we can parse IP
