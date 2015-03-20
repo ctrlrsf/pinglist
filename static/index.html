@@ -82,6 +82,20 @@ var HostList = React.createClass({
 });
 
 var Host = React.createClass({
+  handleDelete: function() {
+    console.log("Deleting: " + this.props.address)
+
+    var deleteUrl = apiUrl + "/" + this.props.address
+
+    $.ajax({
+      url: deleteUrl,
+      type: "DELETE",
+      success: function(result) {
+        console.log("Deleted successfully.")
+      }
+    });
+  },
+
   render: function() {
     var offlineColor = "#FF0000"
     var onlineColor = "#00FF00"
@@ -100,14 +114,17 @@ var Host = React.createClass({
 
     return (
       <div className="container" style={{width: "500px", marginLeft: "2em"}}>
-        <div style={divStyle} className="row">
+        <div className="row">
+          <div className="col-md-1">
+            <a href="#" onClick={this.handleDelete}>&#x2716;</a>
+          </div>
           <div className="col-md-4">
             {this.props.address}
           </div>
-          <div className="col-md-4">
+          <div className="col-md-3">
             {this.props.description}
           </div>
-          <div className="col-md-2">
+          <div className="col-md-2" style={divStyle}>
             {formatStatus(this.props.status)}
           </div>
           <div className="col-md-2">
