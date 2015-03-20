@@ -67,6 +67,7 @@ func pingLoop() {
 				fmt.Printf("Host is up: RTT=%s\n", rtt)
 				host.Status = OnlineStatus
 				host.Latency = rtt
+				hostRegistry.hosts[host.Address] = host
 			} else {
 				fmt.Println("Host is down: timeout")
 			}
@@ -117,7 +118,6 @@ func startHTTPServer(listenIPPort string) {
 			w.WriteJson(&hostRegistry.hosts)
 		}},
 		&rest.Route{"PUT", "/hosts/#address", func(w rest.ResponseWriter, r *rest.Request) {
-
 			hostJson := HostJson{}
 			err := r.DecodeJsonPayload(&hostJson)
 			if err != nil {
@@ -142,6 +142,16 @@ func startHTTPServer(listenIPPort string) {
 
 			h := &Host{Address: hostJson.Address, Description: hostJson.Description}
 			hostRegistry.RegisterHost(h)
+		}},
+		&rest.Route{"DELETE", "/hosts/#address", func(w rest.ResponseWriter, r *rest.Request) {
+			address := r.PathParam("address")
+
+			if !hostRegistry.Contains(address) {
+				rest.Error(w, "Host doesn't exist", http.StatusInternalServerError)
+				return
+			}
+
+			hostRegistry.RemoveHost(address)
 		}},
 	)
 
