@@ -31,19 +31,6 @@ func NewHostRegistry() *HostRegistry {
 	return hr
 }
 
-// RegisterAddress creates a new Host with specified address and adds it
-// to the HostRegistry.
-func (hr *HostRegistry) RegisterAddress(address string) {
-	// Don't add duplicate address, just return if already exists.
-	if hr.Contains(address) {
-		return
-	}
-
-	host := &Host{Address: address}
-
-	hr.hosts[address] = *host
-}
-
 // RegisterHost adds a host to the registry
 func (hr *HostRegistry) RegisterHost(h *Host) {
 	// Don't add duplicate address, just return if already exists.
