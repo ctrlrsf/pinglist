@@ -63,21 +63,24 @@ var HostList = React.createClass({
       keyList.push(key)
     }
 
-    var hostList = this.state.hostList
+    if (keyList.length > 0) {
+      var hostList = this.state.hostList
 
-    var hostLiNodes = keyList.map(function (key) {
-      var host = hostList[key]
+      var hostLiNodes = keyList.map(function (key) {
+        var host = hostList[key]
+        return (
+          <Host key={host.Address} address={host.Address} description={host.Description} status={host.Status} latency={host.Latency} />
+        );
+      });
+
       return (
-        <Host key={host.Address} address={host.Address} description={host.Description} status={host.Status} latency={host.Latency} />
+        <div>
+        {hostLiNodes}
+        </div>
       );
-    });
-
-
-    return (
-      <div>
-      {hostLiNodes}
-      </div>
-    );
+      } else {
+        return ( <div>No hosts being monitored.</div> );
+      }
   }
 });
 
