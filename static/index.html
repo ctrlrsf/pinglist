@@ -167,7 +167,7 @@ var HostAddForm = React.createClass({
       data: JSON.stringify(hostJson),
       dataType: "json",
       success: function(result) {
-        React.findDOMNode(this.refs.address).value = "";
+        console.log("Host added successfully.")
       }.bind(this)
     });
 
