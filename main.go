@@ -19,8 +19,7 @@ var defaultTimeout = 2 * time.Second
 var hostRegistry *HostRegistry
 
 type HostJson struct {
-	Address     string
-	Description string
+	Address, Description string
 }
 
 func main() {
