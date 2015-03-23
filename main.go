@@ -18,6 +18,8 @@ var defaultTimeout = 2 * time.Second
 
 var hostRegistry *HostRegistry
 
+var historyLog *HistoryLog
+
 type HostJson struct {
 	Address, Description string
 }
@@ -38,6 +40,8 @@ func main() {
 
 	app.Action = func(c *cli.Context) {
 		hostRegistry = NewHostRegistry()
+
+		historyLog = NewHistoryLog()
 
 		go pingLoop()
 
@@ -71,6 +75,7 @@ func pingLoop() {
 				fmt.Println("Host is down: timeout")
 			}
 
+			historyLog.AddLogEntry(host.Address, LogEntry{host.Status, host.Latency, time.Now()})
 		}
 		time.Sleep(pingInterval)
 	}
@@ -151,6 +156,15 @@ func startHTTPServer(listenIPPort string) {
 			}
 
 			hostRegistry.RemoveHost(address)
+		}},
+		&rest.Route{"GET", "/history/#address", func(w rest.ResponseWriter, r *rest.Request) {
+			address := r.PathParam("address")
+
+			logEntries := historyLog.GetLogEntryList(address)
+
+			fmt.Printf("Log entires: %q\n", logEntries)
+
+			w.WriteJson(logEntries)
 		}},
 	)
 

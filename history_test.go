@@ -27,11 +27,11 @@ func TestHistoryLog(t *testing.T) {
 		hl.AddLogEntry(testHosts[i].address, le)
 
 		leList := hl.GetLogEntryList(testHosts[i].address)
-		if leList.Len() < 1 {
-			t.Errorf("Bad log entry list. Expected Len() >= 1, actual = %d\n", leList.Len())
+		if len(*leList) < 1 {
+			t.Errorf("Bad log entry list. Expected Len() >= 1, actual = %d\n", len(*leList))
 		}
 
-		firstLe := leList.Front().Value.(LogEntry)
+		firstLe := (*leList)[0]
 		if firstLe.Status != testHosts[i].status {
 			t.Errorf("Bad log entry status. Expected = %d, actual = %d\n",
 				testHosts[i].status, firstLe.Status)

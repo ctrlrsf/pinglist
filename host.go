@@ -14,8 +14,8 @@ const (
 // IP address or hostname.
 type Host struct {
 	Address, Description string
-	Latency     time.Duration
-	Status      byte
+	Latency              time.Duration
+	Status               int
 }
 
 // HostRegistry keeps track of Hosts that will be pinged.
