@@ -16,10 +16,6 @@ import (
 var pingInterval = 5 * time.Second
 var defaultTimeout = 2 * time.Second
 
-var hostRegistry *HostRegistry
-
-var historyLog *HistoryLog
-
 type HostJson struct {
 	Address, Description string
 }
@@ -39,13 +35,13 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) {
-		hostRegistry = NewHostRegistry()
+		var hostRegistry *HostRegistry = NewHostRegistry()
 
-		historyLog = NewHistoryLog()
+		var historyLog *HistoryLog = NewHistoryLog()
 
-		go pingLoop()
+		go pingLoop(hostRegistry, historyLog)
 
-		startHTTPServer(c.String("http"))
+		startHTTPServer(c.String("http"), hostRegistry, historyLog)
 	}
 
 	app.Run(os.Args)
@@ -53,7 +49,7 @@ func main() {
 }
 
 // Ping all hosts and then sleep some amount of time, repeat
-func pingLoop() {
+func pingLoop(hostRegistry *HostRegistry, historyLog *HistoryLog) {
 	// Loop indefinitely
 	for {
 		// Ping each host
@@ -114,7 +110,7 @@ func pingHost(host string, maxRtt time.Duration) (bool, time.Duration, error) {
 }
 
 // Start HTTP server
-func startHTTPServer(listenIPPort string) {
+func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry, historyLog *HistoryLog) {
 	api := rest.NewApi()
 	api.Use(rest.DefaultDevStack...)
 	router, err := rest.MakeRouter(
