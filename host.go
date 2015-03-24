@@ -2,6 +2,7 @@ package main
 
 import (
 	"net"
+	"regexp"
 	"time"
 )
 
@@ -61,13 +62,7 @@ func ValidIPOrHost(address string) bool {
 		return true
 	}
 
-	// Check if we can resolve hostname
-	_, lookupErr := net.LookupHost(address)
+	hostRe := regexp.MustCompile("^[a-zA-Z0-9][a-zA-Z0-9-\\.]{1,254}$")
 
-	// is valid hostname
-	if lookupErr == nil {
-		return true
-	}
-
-	return false
+	return hostRe.MatchString(address)
 }
