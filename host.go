@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	OfflineStatus = iota
+	UnknownStatus = iota
+	OfflineStatus
 	OnlineStatus
 )
 

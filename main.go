@@ -66,10 +66,13 @@ func pingLoop(hostRegistry *HostRegistry, historyLog *HistoryLog) {
 				fmt.Printf("Host is up: RTT=%s\n", rtt)
 				host.Status = OnlineStatus
 				host.Latency = rtt
-				hostRegistry.hosts[host.Address] = host
 			} else {
+				host.Status = OfflineStatus
 				fmt.Println("Host is down: timeout")
 			}
+
+			// Overwrite with new host struct
+			hostRegistry.hosts[host.Address] = host
 
 			historyLog.AddLogEntry(host.Address, LogEntry{host.Status, host.Latency, time.Now()})
 		}

@@ -24,10 +24,14 @@ var formatLatency = function(microsecs) {
 }
 
 var formatStatus = function(statusInt) {
-  if (statusInt === 1) {
-    return "Online"
+  switch (statusInt) {
+    case 0:
+      return "Unknown"
+    case 1:
+      return "Offline"
+    case 2:
+      return "Online"
   }
-  return "Offline"
 }
 
 
@@ -100,14 +104,21 @@ var Host = React.createClass({
   },
 
   render: function() {
+    var unknownColor = "#DDDD00"
     var offlineColor = "#FF0000"
     var onlineColor = "#00FF00"
     var statusColor
 
-    if (this.props.status === 1) {
-      statusColor = onlineColor
-    } else {
-      statusColor = offlineColor
+    switch (this.props.status) {
+      case 0:
+        statusColor = unknownColor
+        break
+      case 1:
+        statusColor = offlineColor
+        break
+      case 2:
+        statusColor = onlineColor
+        break
     }
 
     var divStyle = {
