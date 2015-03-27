@@ -6,7 +6,7 @@ import (
 )
 
 type LogEntry struct {
-	Status    int
+	Status    HostStatus
 	Latency   time.Duration
 	Timestamp time.Time
 }
@@ -16,7 +16,7 @@ type HistoryLog struct {
 }
 
 // NewLogEntry creates and returns a new LogEntry object
-func NewLogEntry(status int, latency time.Duration, timestamp time.Time) LogEntry {
+func NewLogEntry(status HostStatus, latency time.Duration, timestamp time.Time) LogEntry {
 	return LogEntry{status, latency, timestamp}
 }
 

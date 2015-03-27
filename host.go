@@ -6,18 +6,31 @@ import (
 	"time"
 )
 
+type HostStatus int
+
 const (
-	UnknownStatus = iota
-	OfflineStatus
-	OnlineStatus
+	UnknownStatus = HostStatus(0)
+	OfflineStatus = HostStatus(1)
+	OnlineStatus  = HostStatus(2)
 )
+
+// String returns the string representation of HostStatus
+func (hs HostStatus) String() string {
+	switch hs {
+	case OfflineStatus:
+		return "Offline"
+	case OnlineStatus:
+		return "Online"
+	}
+	return "Unknown"
+}
 
 // Host holds information about a host that will be pinged, such as
 // IP address or hostname.
 type Host struct {
 	Address, Description string
 	Latency              time.Duration
-	Status               int
+	Status               HostStatus
 }
 
 // HostRegistry keeps track of Hosts that will be pinged.

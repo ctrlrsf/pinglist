@@ -54,8 +54,6 @@ func pingLoop(hostRegistry *HostRegistry, historyLog *HistoryLog) {
 	for {
 		// Ping each host
 		for _, host := range hostRegistry.hosts {
-			fmt.Printf("Pinging: %s\n", host.Address)
-
 			isUp, rtt, err := pingHost(host.Address, defaultTimeout)
 
 			if err != nil {
@@ -63,13 +61,12 @@ func pingLoop(hostRegistry *HostRegistry, historyLog *HistoryLog) {
 			}
 
 			if isUp {
-				fmt.Printf("Host is up: RTT=%s\n", rtt)
 				host.Status = OnlineStatus
 				host.Latency = rtt
 			} else {
 				host.Status = OfflineStatus
-				fmt.Println("Host is down: timeout")
 			}
+			fmt.Printf("Pinged: address=%q status=%s rtt=%s\n", host.Address, host.Status, host.Latency)
 
 			// Overwrite with new host struct
 			hostRegistry.hosts[host.Address] = host
