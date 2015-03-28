@@ -13,9 +13,6 @@ import (
 	"github.com/tatsushid/go-fastping"
 )
 
-var pingInterval = 5 * time.Second
-var defaultTimeout = 2 * time.Second
-
 type HostJson struct {
 	Address, Description string
 }
@@ -39,7 +36,10 @@ func main() {
 
 		var historyLog *HistoryLog = NewHistoryLog()
 
-		go pingLoop(hostRegistry, historyLog)
+		var pingInterval = 5 * time.Second
+		var defaultTimeout = 2 * time.Second
+
+		go pingLoop(hostRegistry, historyLog, pingInterval, defaultTimeout)
 
 		startHTTPServer(c.String("http"), hostRegistry, historyLog)
 	}
@@ -49,12 +49,12 @@ func main() {
 }
 
 // Ping all hosts and then sleep some amount of time, repeat
-func pingLoop(hostRegistry *HostRegistry, historyLog *HistoryLog) {
+func pingLoop(hostRegistry *HostRegistry, historyLog *HistoryLog, interval time.Duration, timeout time.Duration) {
 	// Loop indefinitely
 	for {
 		// Ping each host
 		for _, host := range hostRegistry.hosts {
-			isUp, rtt, err := pingHost(host.Address, defaultTimeout)
+			isUp, rtt, err := pingHost(host.Address, timeout)
 
 			if err != nil {
 				fmt.Println(err)
@@ -73,7 +73,7 @@ func pingLoop(hostRegistry *HostRegistry, historyLog *HistoryLog) {
 
 			historyLog.AddLogEntry(host.Address, LogEntry{host.Status, host.Latency, time.Now()})
 		}
-		time.Sleep(pingInterval)
+		time.Sleep(interval)
 	}
 }
 
