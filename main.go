@@ -28,6 +28,17 @@ func main() {
 		cli.StringFlag{
 			Name:  "http",
 			Value: ":8000",
+			Usage: "host and port HTTP server should listen on",
+		},
+		cli.IntFlag{
+			Name:  "interval",
+			Value: 5,
+			Usage: "Time interval between checking hosts (seconds)",
+		},
+		cli.IntFlag{
+			Name:  "timeout",
+			Value: 2,
+			Usage: "Seconds to wait for reply before considering host down",
 		},
 	}
 
@@ -36,8 +47,8 @@ func main() {
 
 		var historyLog *HistoryLog = NewHistoryLog()
 
-		var pingInterval = 5 * time.Second
-		var defaultTimeout = 2 * time.Second
+		pingInterval := time.Duration(c.Int("interval")) * time.Second
+		defaultTimeout := time.Duration(c.Int("timeout")) * time.Second
 
 		go pingLoop(hostRegistry, historyLog, pingInterval, defaultTimeout)
 
