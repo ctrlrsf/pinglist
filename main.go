@@ -50,7 +50,10 @@ func main() {
 		pingInterval := time.Duration(c.Int("interval")) * time.Second
 		defaultTimeout := time.Duration(c.Int("timeout")) * time.Second
 
-		go pingLoop(hostRegistry, historyLog, pingInterval, defaultTimeout)
+		results := make(chan Host, 2)
+		go pingLoop(results, hostRegistry, pingInterval, defaultTimeout)
+
+		go storePingResults(results, hostRegistry, historyLog)
 
 		startHTTPServer(c.String("http"), hostRegistry, historyLog)
 	}
@@ -60,7 +63,7 @@ func main() {
 }
 
 // Ping all hosts and then sleep some amount of time, repeat
-func pingLoop(hostRegistry *HostRegistry, historyLog *HistoryLog, interval time.Duration, timeout time.Duration) {
+func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Duration, timeout time.Duration) {
 	// Loop indefinitely
 	for {
 		// Ping each host
@@ -79,12 +82,22 @@ func pingLoop(hostRegistry *HostRegistry, historyLog *HistoryLog, interval time.
 			}
 			fmt.Printf("Pinged: address=%q status=%s rtt=%s\n", host.Address, host.Status, host.Latency)
 
-			// Overwrite with new host struct
-			hostRegistry.hosts[host.Address] = host
+			results <- host
 
-			historyLog.AddLogEntry(host.Address, LogEntry{host.Status, host.Latency, time.Now()})
 		}
 		time.Sleep(interval)
+	}
+}
+
+// Process and store ping results received from channel
+func storePingResults(results chan Host, hostRegistry *HostRegistry, historyLog *HistoryLog) {
+	for {
+		host := <-results
+
+		// Overwrite with new host struct
+		hostRegistry.hosts[host.Address] = host
+
+		historyLog.AddLogEntry(host.Address, LogEntry{host.Status, host.Latency, time.Now()})
 	}
 }
 
