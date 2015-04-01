@@ -7,7 +7,7 @@ import (
 
 type TestHost struct {
 	address string
-	status  int
+	status  HostStatus
 	latency time.Duration
 }
 
