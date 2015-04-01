@@ -3,6 +3,7 @@ package main
 import (
 	"net"
 	"regexp"
+	"sync"
 	"time"
 )
 
@@ -35,12 +36,14 @@ type Host struct {
 
 // HostRegistry keeps track of Hosts that will be pinged.
 type HostRegistry struct {
+	mutex *sync.RWMutex
 	hosts map[string]Host
 }
 
 // NewHostRegistry returns new HostRegistry where hosts can later be added.
 func NewHostRegistry() *HostRegistry {
 	hr := &HostRegistry{}
+	hr.mutex = &sync.RWMutex{}
 	hr.hosts = make(map[string]Host)
 	return hr
 }
@@ -52,18 +55,31 @@ func (hr *HostRegistry) RegisterHost(h *Host) {
 		return
 	}
 
+	hr.mutex.Lock()
 	hr.hosts[h.Address] = *h
+	hr.mutex.Unlock()
 }
 
 // Contains checks if host list already contains a host entry with same address.
 func (hr *HostRegistry) Contains(address string) bool {
+	hr.mutex.RLock()
+	defer hr.mutex.RUnlock()
+
 	_, ok := hr.hosts[address]
 	return ok
 }
 
 // RemoveHost removes a host from the registry.
 func (hr *HostRegistry) RemoveHost(address string) {
+	hr.mutex.Lock()
+	defer hr.mutex.Unlock()
+
 	delete(hr.hosts, address)
+}
+
+// GetHosts returns map of hosts
+func (hr *HostRegistry) GetHosts() map[string]Host {
+	return hr.hosts
 }
 
 // ValidIPOrHost validates address is an IP or hostname

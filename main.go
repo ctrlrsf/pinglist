@@ -66,8 +66,10 @@ func main() {
 func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Duration, timeout time.Duration) {
 	// Loop indefinitely
 	for {
+		hostRegistry.mutex.RLock()
+
 		// Ping each host
-		for _, host := range hostRegistry.hosts {
+		for _, host := range hostRegistry.GetHosts() {
 			isUp, rtt, err := pingHost(host.Address, timeout)
 
 			if err != nil {
@@ -85,6 +87,8 @@ func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Durat
 			results <- host
 
 		}
+		hostRegistry.mutex.RUnlock()
+
 		time.Sleep(interval)
 	}
 }
@@ -95,7 +99,9 @@ func storePingResults(results chan Host, hostRegistry *HostRegistry, historyLog 
 		host := <-results
 
 		// Overwrite with new host struct
+		hostRegistry.mutex.Lock()
 		hostRegistry.hosts[host.Address] = host
+		hostRegistry.mutex.Unlock()
 
 		historyLog.AddLogEntry(host.Address, LogEntry{host.Status, host.Latency, time.Now()})
 	}
@@ -139,7 +145,9 @@ func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry, historyLog
 	api.Use(rest.DefaultDevStack...)
 	router, err := rest.MakeRouter(
 		&rest.Route{"GET", "/hosts", func(w rest.ResponseWriter, r *rest.Request) {
+			hostRegistry.mutex.RLock()
 			w.WriteJson(&hostRegistry.hosts)
+			hostRegistry.mutex.RUnlock()
 		}},
 		&rest.Route{"PUT", "/hosts/#address", func(w rest.ResponseWriter, r *rest.Request) {
 			hostJson := HostJson{}
