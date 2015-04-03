@@ -37,38 +37,24 @@ var formatStatus = function(statusInt) {
 
 
 var HostList = React.createClass({
-  getInitialState: function() {
-    return {
-      hostList: {}
-    };
-  },
-
-  componentDidMount: function() {
-    this.loadData();
-  },
-
-  loadData: function() {
-    $.get(this.props.source, function(result) {
-      if (result !== null) {
-        var hostList = result
-        if (this.isMounted()) {
-          this.setState({
-            hostList: hostList
-          });
-        }
-      }
-    }.bind(this));
-    setTimeout(this.loadData, 5000)
-  },
-
   render: function() {
+    if (this.props.error === true) {
+      return (
+        <div>
+        <HostListAutoUpdate />
+        Error communicating with server.
+        </div>
+      );
+    }
+
+
     var keyList = new Array()
-    for (var key in this.state.hostList) {
+    for (var key in this.props.data) {
       keyList.push(key)
     }
 
     if (keyList.length > 0) {
-      var hostList = this.state.hostList
+      var hostList = this.props.data
 
       var hostLiNodes = keyList.map(function (key) {
         var host = hostList[key]
@@ -79,11 +65,17 @@ var HostList = React.createClass({
 
       return (
         <div>
+        <HostListAutoUpdate />
         {hostLiNodes}
         </div>
       );
       } else {
-        return ( <div>Not monitoring any hosts. Add a new host above.</div> );
+        return (
+          <div>
+            <HostListAutoUpdate />
+            <div>Not monitoring any hosts. Add a new host above.</div>
+          </div>
+        );
       }
   }
 });
@@ -150,6 +142,48 @@ var Host = React.createClass({
   }
 });
 
+var HostListAutoUpdate = React.createClass({
+  getInitialState: function() {
+    return {
+      isChecked: false,
+      savedInterval: 0
+    };
+  },
+
+  componentDidMount: function() {
+    this.handleChange()
+  },
+
+  handleChange: function(event) {
+    var isChecked = !this.state.isChecked
+    var savedInterval = this.state.savedInterval
+
+    console.dir(this.state)
+
+    if (isChecked === true) {
+      console.log("Starting auto update..")
+      console.dir(HostList)
+      savedInterval = setInterval(renderHostList, 5000)
+    } else {
+      console.log("Stopping auto update..")
+      clearInterval(savedInterval)
+    }
+
+    // Update component state
+    this.setState({
+      isChecked: isChecked,
+      savedInterval: savedInterval
+    });
+  },
+  render: function() {
+    return (
+      <div>
+        Auto-update: <input type="checkbox" checked={this.state.isChecked} onChange={this.handleChange} />
+      </div>
+    );
+  }
+});
+
 var HostAddForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
@@ -198,8 +232,25 @@ var HostAddForm = React.createClass({
 
 var apiUrl = "http://" + window.location.host + "/api/hosts"
 
+function renderHostList() {
+  $.ajax({
+    url: apiUrl,
+    success: function(result) {
+      if (result !== null) {
+        var hostList = result
+        React.render(<HostList data={hostList} />, document.getElementById("hostlist"))
+      }
+    },
+    error: function (xhr, status, error) {
+      React.render(<HostList error={true} />, document.getElementById("hostlist"))
+    },
+    timeout: 5000
+  });
+
+}
+
 React.render(<HostAddForm url={apiUrl} />, document.getElementById("hostform"))
-React.render(<HostList source={apiUrl} />, document.getElementById("hostlist"))
+renderHostList()
     </script>
   </body>
 </html>
