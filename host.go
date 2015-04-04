@@ -82,6 +82,17 @@ func (hr *HostRegistry) GetHosts() map[string]Host {
 	return hr.hosts
 }
 
+// GetHosts returns map of hosts
+func (hr *HostRegistry) GetHostsList() []string {
+	list := make([]string, 0)
+
+	for key, _ := range hr.hosts {
+		list = append(list, key)
+	}
+
+	return list
+}
+
 // ValidIPOrHost validates address is an IP or hostname
 func ValidIPOrHost(address string) bool {
 	// Check if we can parse IP

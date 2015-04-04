@@ -6,6 +6,10 @@ import (
 	"os"
 	"time"
 
+	//	"log"
+	//	"net/http"
+	_ "net/http/pprof"
+
 	"github.com/codegangsta/cli"
 	"github.com/tatsushid/go-fastping"
 )
@@ -39,6 +43,10 @@ func main() {
 		},
 	}
 
+	//	go func() {
+	//		log.Println(http.ListenAndServe("localhost:6060", nil))
+	//	}()
+
 	app.Action = func(c *cli.Context) {
 		var hostRegistry *HostRegistry = NewHostRegistry()
 
@@ -47,7 +55,7 @@ func main() {
 		pingInterval := time.Duration(c.Int("interval")) * time.Second
 		defaultTimeout := time.Duration(c.Int("timeout")) * time.Second
 
-		results := make(chan Host, 2)
+		results := make(chan Host)
 		go pingLoop(results, hostRegistry, pingInterval, defaultTimeout)
 
 		go storePingResults(results, hostRegistry, historyLog)
@@ -64,9 +72,17 @@ func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Durat
 	// Loop indefinitely
 	for {
 		hostRegistry.mutex.RLock()
+		hosts := hostRegistry.GetHostsList()
+		hostRegistry.mutex.RUnlock()
+
+		fmt.Printf("Host list: %q\n", hosts)
 
 		// Ping each host
-		for _, host := range hostRegistry.GetHosts() {
+		for _, hostName := range hosts {
+			hostRegistry.mutex.RLock()
+			host := hostRegistry.hosts[hostName]
+			hostRegistry.mutex.RUnlock()
+
 			isUp, rtt, err := pingHost(host.Address, timeout)
 
 			if err != nil {
@@ -84,7 +100,6 @@ func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Durat
 			results <- host
 
 		}
-		hostRegistry.mutex.RUnlock()
 
 		time.Sleep(interval)
 	}
