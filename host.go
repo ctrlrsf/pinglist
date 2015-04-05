@@ -82,8 +82,8 @@ func (hr *HostRegistry) GetHosts() map[string]Host {
 	return hr.hosts
 }
 
-// GetHosts returns map of hosts
-func (hr *HostRegistry) GetHostsList() []string {
+// GetHostAddresses returns map of hosts
+func (hr *HostRegistry) GetHostAddresses() []string {
 	list := make([]string, 0)
 
 	for key, _ := range hr.hosts {

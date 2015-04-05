@@ -72,15 +72,15 @@ func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Durat
 	// Loop indefinitely
 	for {
 		hostRegistry.mutex.RLock()
-		hosts := hostRegistry.GetHostsList()
+		hostAddresses := hostRegistry.GetHostAddresses()
 		hostRegistry.mutex.RUnlock()
 
-		fmt.Printf("Host list: %q\n", hosts)
+		fmt.Printf("Host addresses: %q\n", hostAddresses)
 
 		// Ping each host
-		for _, hostName := range hosts {
+		for _, address := range hostAddresses {
 			hostRegistry.mutex.RLock()
-			host := hostRegistry.hosts[hostName]
+			host := hostRegistry.hosts[address]
 			hostRegistry.mutex.RUnlock()
 
 			isUp, rtt, err := pingHost(host.Address, timeout)
