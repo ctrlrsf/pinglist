@@ -6,8 +6,6 @@ import (
 	"os"
 	"time"
 
-	//	"log"
-	//	"net/http"
 	_ "net/http/pprof"
 
 	"github.com/codegangsta/cli"
@@ -42,10 +40,6 @@ func main() {
 			Usage: "Seconds to wait for reply before considering host down",
 		},
 	}
-
-	//	go func() {
-	//		log.Println(http.ListenAndServe("localhost:6060", nil))
-	//	}()
 
 	app.Action = func(c *cli.Context) {
 		var hostRegistry *HostRegistry = NewHostRegistry()
