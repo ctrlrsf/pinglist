@@ -74,8 +74,14 @@ func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Durat
 		// Ping each host
 		for _, address := range hostAddresses {
 			hostRegistry.mutex.RLock()
-			host := hostRegistry.hosts[address]
+			host, hostOk := hostRegistry.hosts[address]
 			hostRegistry.mutex.RUnlock()
+
+			// host address was not found in map, it has been deleted so
+			// don't continue with pinging host.
+			if !hostOk {
+				continue
+			}
 
 			isUp, rtt, err := pingHost(host.Address, timeout)
 
@@ -106,7 +112,12 @@ func storePingResults(results chan Host, hostRegistry *HostRegistry, historyLog 
 
 		// Overwrite with new host struct
 		hostRegistry.mutex.Lock()
-		hostRegistry.hosts[host.Address] = host
+		// Only store new host if key already exists. Possible that host was deleted
+		// while a ping for that host was already in progress. This confirms host is
+		// still valid before storing.
+		if _, ok := hostRegistry.hosts[host.Address]; ok {
+			hostRegistry.hosts[host.Address] = host
+		}
 		hostRegistry.mutex.Unlock()
 
 		historyLog.AddLogEntry(host.Address, LogEntry{host.Status, host.Latency, time.Now()})
