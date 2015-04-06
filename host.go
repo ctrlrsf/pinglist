@@ -86,9 +86,11 @@ func (hr *HostRegistry) GetHosts() map[string]Host {
 func (hr *HostRegistry) GetHostAddresses() []string {
 	list := make([]string, 0)
 
+	hr.mutex.RLock()
 	for key, _ := range hr.hosts {
 		list = append(list, key)
 	}
+	hr.mutex.RUnlock()
 
 	return list
 }
