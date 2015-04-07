@@ -83,29 +83,15 @@ func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Durat
 				continue
 			}
 
-			isUp, rtt, err := pingHost(host.Address, timeout)
-
-			if err != nil {
-				fmt.Println(err)
-			}
-
-			if isUp {
-				host.Status = OnlineStatus
-				host.Latency = rtt
-			} else {
-				host.Status = OfflineStatus
-			}
-			fmt.Printf("Pinged: address=%q status=%s rtt=%s\n", host.Address, host.Status, host.Latency)
-
-			results <- host
-
+			// Ping host in a goroutine so we can ping multiple hosts concurrently
+			go pingHost(results, &host, timeout)
 		}
 
 		time.Sleep(interval)
 	}
 }
 
-// Process and store ping results received from channel
+// Process and store ping results received from results channel
 func storePingResults(results chan Host, hostRegistry *HostRegistry, historyLog *HistoryLog) {
 	for {
 		host := <-results
@@ -124,13 +110,32 @@ func storePingResults(results chan Host, hostRegistry *HostRegistry, historyLog 
 	}
 }
 
-// Pings a host to check if host is up and records network latency
+// pingHost pings a host and sends result down results channel for storage
+func pingHost(results chan Host, host *Host, timeout time.Duration) {
+	isUp, rtt, err := pingHostAddress(host.Address, timeout)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if isUp {
+		host.Status = OnlineStatus
+		host.Latency = rtt
+	} else {
+		host.Status = OfflineStatus
+	}
+	fmt.Printf("Pinged: address=%q status=%s rtt=%s\n", host.Address, host.Status, host.Latency)
+
+	results <- *host
+}
+
+// pingHostAddress pings a host to check if host is up and records network latency
 //
 // host arg should be a string hostname or IP
 // maxRtt is how long to wait before declaring host down
 //
 // Returns whether host was up, latency, and/or any error
-func pingHost(host string, maxRtt time.Duration) (bool, time.Duration, error) {
+func pingHostAddress(host string, maxRtt time.Duration) (bool, time.Duration, error) {
 	var retRtt time.Duration
 	var isUp = false
 
