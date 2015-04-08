@@ -77,11 +77,6 @@ func (hr *HostRegistry) RemoveHost(address string) {
 	delete(hr.hosts, address)
 }
 
-// GetHosts returns map of hosts
-func (hr *HostRegistry) GetHosts() map[string]Host {
-	return hr.hosts
-}
-
 // GetHostAddresses returns map of hosts
 func (hr *HostRegistry) GetHostAddresses() []string {
 	list := make([]string, 0)
