@@ -84,7 +84,7 @@ func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Durat
 			}
 
 			// Ping host in a goroutine so we can ping multiple hosts concurrently
-			go pingHost(results, &host, timeout)
+			go pingHost(results, host, timeout)
 		}
 
 		time.Sleep(interval)
@@ -111,7 +111,7 @@ func storePingResults(results chan Host, hostRegistry *HostRegistry, historyLog 
 }
 
 // pingHost pings a host and sends result down results channel for storage
-func pingHost(results chan Host, host *Host, timeout time.Duration) {
+func pingHost(results chan Host, host Host, timeout time.Duration) {
 	isUp, rtt, err := pingHostAddress(host.Address, timeout)
 
 	if err != nil {
@@ -126,7 +126,7 @@ func pingHost(results chan Host, host *Host, timeout time.Duration) {
 	}
 	fmt.Printf("Pinged: address=%q status=%s rtt=%s\n", host.Address, host.Status, host.Latency)
 
-	results <- *host
+	results <- host
 }
 
 // pingHostAddress pings a host to check if host is up and records network latency
