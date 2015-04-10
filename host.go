@@ -69,6 +69,19 @@ func (hr *HostRegistry) Contains(address string) bool {
 	return ok
 }
 
+// UpdateHost updates a host in the registry.
+func (hr *HostRegistry) UpdateHost(host Host) {
+	hr.mutex.Lock()
+
+	// Only store new host if key already exists. Possible that host was deleted
+	// while a ping for that host was already in progress. This confirms host is
+	// still valid before storing.
+	if _, ok := hr.hosts[host.Address]; ok {
+		hr.hosts[host.Address] = host
+	}
+	hr.mutex.Unlock()
+}
+
 // RemoveHost removes a host from the registry.
 func (hr *HostRegistry) RemoveHost(address string) {
 	hr.mutex.Lock()

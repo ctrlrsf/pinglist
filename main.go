@@ -96,15 +96,18 @@ func storePingResults(results chan Host, hostRegistry *HostRegistry, historyLog 
 	for {
 		host := <-results
 
-		// Overwrite with new host struct
-		hostRegistry.mutex.Lock()
-		// Only store new host if key already exists. Possible that host was deleted
-		// while a ping for that host was already in progress. This confirms host is
-		// still valid before storing.
-		if _, ok := hostRegistry.hosts[host.Address]; ok {
-			hostRegistry.hosts[host.Address] = host
-		}
-		hostRegistry.mutex.Unlock()
+		/*
+			// Overwrite with new host struct
+			hostRegistry.mutex.Lock()
+			// Only store new host if key already exists. Possible that host was deleted
+			// while a ping for that host was already in progress. This confirms host is
+			// still valid before storing.
+			if _, ok := hostRegistry.hosts[host.Address]; ok {
+				hostRegistry.hosts[host.Address] = host
+			}
+			hostRegistry.mutex.Unlock()
+		*/
+		hostRegistry.UpdateHost(host)
 
 		historyLog.AddLogEntry(host.Address, LogEntry{host.Status, host.Latency, time.Now()})
 	}
