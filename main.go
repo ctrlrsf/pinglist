@@ -63,26 +63,13 @@ func main() {
 
 // Ping all hosts and then sleep some amount of time, repeat
 func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Duration, timeout time.Duration) {
-	// Loop indefinitely
 	for {
 		hostAddresses := hostRegistry.GetHostAddresses()
 
-		fmt.Printf("Host addresses: %q\n", hostAddresses)
+		fmt.Printf("Pinging these addresses: %q\n", hostAddresses)
 
-		// Ping each host
 		for _, address := range hostAddresses {
-			hostRegistry.mutex.RLock()
-			host, hostOk := hostRegistry.hosts[address]
-			hostRegistry.mutex.RUnlock()
-
-			// host address was not found in map, it has been deleted so
-			// don't continue with pinging host.
-			if !hostOk {
-				continue
-			}
-
-			// Ping host in a goroutine so we can ping multiple hosts concurrently
-			go pingHost(results, host, timeout)
+			go pingAddress(results, address, timeout)
 		}
 
 		time.Sleep(interval)
@@ -100,13 +87,15 @@ func storePingResults(results chan Host, hostRegistry *HostRegistry, historyLog 
 	}
 }
 
-// pingHost pings a host and sends result down results channel for storage
-func pingHost(results chan Host, host Host, timeout time.Duration) {
-	isUp, rtt, err := pingHostAddress(host.Address, timeout)
+// pingAddress pings a host and sends result down results channel for storage
+func pingAddress(results chan Host, address string, timeout time.Duration) {
+	isUp, rtt, err := pingWithFastping(address, timeout)
 
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	host := Host{}
 
 	if isUp {
 		host.Status = OnlineStatus
@@ -119,19 +108,20 @@ func pingHost(results chan Host, host Host, timeout time.Duration) {
 	results <- host
 }
 
-// pingHostAddress pings a host to check if host is up and records network latency
+// pingWithFastping pings a device using the fastping library and determines whether
+// it is up or down, and latency
 //
-// host arg should be a string hostname or IP
+// address arg should be a string hostname or IP
 // maxRtt is how long to wait before declaring host down
 //
 // Returns whether host was up, latency, and/or any error
-func pingHostAddress(host string, maxRtt time.Duration) (bool, time.Duration, error) {
+func pingWithFastping(address string, maxRtt time.Duration) (bool, time.Duration, error) {
 	var retRtt time.Duration
 	var isUp = false
 
 	p := fastping.NewPinger()
 	p.MaxRTT = maxRtt
-	ra, err := net.ResolveIPAddr("ip4:icmp", host)
+	ra, err := net.ResolveIPAddr("ip4:icmp", address)
 
 	if err != nil {
 		return false, 0, err
