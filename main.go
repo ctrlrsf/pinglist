@@ -65,9 +65,7 @@ func main() {
 func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Duration, timeout time.Duration) {
 	// Loop indefinitely
 	for {
-		hostRegistry.mutex.RLock()
 		hostAddresses := hostRegistry.GetHostAddresses()
-		hostRegistry.mutex.RUnlock()
 
 		fmt.Printf("Host addresses: %q\n", hostAddresses)
 
