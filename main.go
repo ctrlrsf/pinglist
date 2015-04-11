@@ -76,7 +76,7 @@ func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Durat
 	}
 }
 
-// Process and store ping results received from results channel
+// Store ping results received from results channel
 func storePingResults(results chan Host, hostRegistry *HostRegistry, historyLog *HistoryLog) {
 	for {
 		host := <-results
