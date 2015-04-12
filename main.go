@@ -81,6 +81,8 @@ func storePingResults(results chan Host, hostRegistry *HostRegistry, historyLog 
 	for {
 		host := <-results
 
+		fmt.Printf("Storing host: %q\n", host)
+
 		hostRegistry.UpdateHost(host)
 
 		historyLog.AddLogEntry(host.Address, LogEntry{host.Status, host.Latency, time.Now()})
@@ -96,6 +98,8 @@ func pingAddress(results chan Host, address string, timeout time.Duration) {
 	}
 
 	host := Host{}
+
+	host.Address = address
 
 	if isUp {
 		host.Status = OnlineStatus
