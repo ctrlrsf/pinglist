@@ -11,17 +11,17 @@ import (
 type HostStatus int
 
 const (
-	UnknownStatus = HostStatus(0)
-	OfflineStatus = HostStatus(1)
-	OnlineStatus  = HostStatus(2)
+	Unknown = HostStatus(0)
+	Offline = HostStatus(1)
+	Online  = HostStatus(2)
 )
 
 // String returns the string representation of HostStatus
 func (hs HostStatus) String() string {
 	switch hs {
-	case OfflineStatus:
+	case Offline:
 		return "Offline"
-	case OnlineStatus:
+	case Online:
 		return "Online"
 	}
 	return "Unknown"

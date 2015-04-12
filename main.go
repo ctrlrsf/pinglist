@@ -102,10 +102,10 @@ func pingAddress(results chan Host, address string, timeout time.Duration) {
 	host.Address = address
 
 	if isUp {
-		host.Status = OnlineStatus
+		host.Status = Online
 		host.Latency = rtt
 	} else {
-		host.Status = OfflineStatus
+		host.Status = Offline
 	}
 	fmt.Printf("Pinged: address=%q status=%s rtt=%s\n", host.Address, host.Status, host.Latency)
 
