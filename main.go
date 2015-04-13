@@ -39,6 +39,11 @@ func main() {
 			Value: 2,
 			Usage: "Seconds to wait for reply before considering host down",
 		},
+		cli.StringFlag{
+			Name:  "influxuri",
+			Value: "http://localhost:8086",
+			Usage: "URL to InfluxDB server",
+		},
 	}
 
 	app.Action = func(c *cli.Context) {
