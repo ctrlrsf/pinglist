@@ -162,7 +162,6 @@ var HostListAutoUpdate = React.createClass({
 
     if (isChecked === true) {
       console.log("Starting auto update..")
-      console.dir(HostList)
       savedInterval = setInterval(renderHostList, 5000)
     } else {
       console.log("Stopping auto update..")
