@@ -40,7 +40,7 @@ func main() {
 			Usage: "Seconds to wait for reply before considering host down",
 		},
 		cli.StringFlag{
-			Name:  "influxuri",
+			Name:  "influxurl",
 			Value: "http://localhost:8086",
 			Usage: "URL to InfluxDB server",
 		},
@@ -57,7 +57,8 @@ func main() {
 		results := make(chan Host)
 		go pingLoop(results, hostRegistry, pingInterval, defaultTimeout)
 
-		go storePingResults(results, hostRegistry, historyLog)
+		ic := NewInfluxContext(c.String("influxurl"))
+		go storePingResults(results, hostRegistry, historyLog, &ic)
 
 		startHTTPServer(c.String("http"), hostRegistry, historyLog)
 	}
@@ -82,15 +83,20 @@ func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Durat
 }
 
 // Store ping results received from results channel
-func storePingResults(results chan Host, hostRegistry *HostRegistry, historyLog *HistoryLog) {
+func storePingResults(results chan Host, hostRegistry *HostRegistry,
+	historyLog *HistoryLog, influxContext *InfluxContext) {
+
 	for {
 		host := <-results
 
-		fmt.Printf("Storing host: %q\n", host)
+		fmt.Printf("Storing results for host: %q\n", host)
 
 		hostRegistry.UpdateHost(host)
 
 		historyLog.AddLogEntry(host.Address, LogEntry{host.Status, host.Latency, time.Now()})
+
+		influxContext.WritePoint(host.Address, "latency", host.Latency.String())
+		influxContext.WritePoint(host.Address, "status", host.Status.String())
 	}
 }
 
