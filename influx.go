@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/influxdb/influxdb/client"
-	"log"
 	"net/url"
 	"os"
 	"time"
@@ -52,7 +51,7 @@ func (ic *InfluxContext) Ping() error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Influx client ping: %v, %s", duration, version)
+	log.Info("Influx client ping: %v, %s", duration, version)
 
 	ic.version = version
 

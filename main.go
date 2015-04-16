@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net"
 	"os"
 	"time"
@@ -9,12 +8,15 @@ import (
 	_ "net/http/pprof"
 
 	"github.com/codegangsta/cli"
+	"github.com/op/go-logging"
 	"github.com/tatsushid/go-fastping"
 )
 
 type HostJson struct {
 	Address, Description string
 }
+
+var log = logging.MustGetLogger("pinglist")
 
 func main() {
 	app := cli.NewApp()
@@ -39,6 +41,10 @@ func main() {
 			Value: 2,
 			Usage: "Seconds to wait for reply before considering host down",
 		},
+		cli.BoolFlag{
+			Name:  "debug",
+			Usage: "Enable debug output",
+		},
 		cli.StringFlag{
 			Name:  "influxurl",
 			Value: "http://localhost:8086",
@@ -47,6 +53,10 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) {
+		if c.Bool("debug") {
+			logging.SetLevel(logging.DEBUG, "pinglist")
+		}
+
 		var hostRegistry *HostRegistry = NewHostRegistry()
 
 		var historyLog *HistoryLog = NewHistoryLog()
@@ -72,7 +82,7 @@ func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Durat
 	for {
 		hostAddresses := hostRegistry.GetHostAddresses()
 
-		fmt.Printf("Pinging these addresses: %q\n", hostAddresses)
+		log.Info("Pinging these addresses: %q\n", hostAddresses)
 
 		for _, address := range hostAddresses {
 			go pingAddress(results, address, timeout)
@@ -89,7 +99,7 @@ func storePingResults(results chan Host, hostRegistry *HostRegistry,
 	for {
 		host := <-results
 
-		fmt.Printf("Storing results for host: %q\n", host)
+		log.Info("Storing results for host: %q\n", host)
 
 		hostRegistry.UpdateHost(host)
 
@@ -105,7 +115,7 @@ func pingAddress(results chan Host, address string, timeout time.Duration) {
 	isUp, rtt, err := pingWithFastping(address, timeout)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err.Error())
 	}
 
 	host := Host{}
@@ -118,7 +128,7 @@ func pingAddress(results chan Host, address string, timeout time.Duration) {
 	} else {
 		host.Status = Offline
 	}
-	fmt.Printf("Pinged: address=%q status=%s rtt=%s\n", host.Address, host.Status, host.Latency)
+	log.Info("Pinged: address=%q status=%s rtt=%s\n", host.Address, host.Status, host.Latency)
 
 	results <- host
 }

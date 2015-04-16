@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/ant0ine/go-json-rest/rest"
@@ -59,7 +57,7 @@ func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry, historyLog
 
 			logEntries := historyLog.GetLogEntryList(address)
 
-			fmt.Printf("Log entires: %q\n", logEntries)
+			log.Debug("Log entries: %q\n", logEntries)
 
 			w.WriteJson(logEntries)
 		}},

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net"
 	"regexp"
 	"sync"
@@ -81,7 +80,7 @@ func (hr *HostRegistry) UpdateHost(host Host) {
 		hr.hosts[host.Address] = host
 	}
 	hr.mutex.Unlock()
-	fmt.Printf("HostRegistry.Hosts = %q\n", hr.hosts)
+	log.Debug("HostRegistry.Hosts = %q\n", hr.hosts)
 }
 
 // RemoveHost removes a host from the registry.
