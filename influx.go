@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/influxdb/influxdb/client"
 	"net/url"
 	"os"
@@ -83,4 +84,28 @@ func (ic *InfluxContext) WritePoint(host, name, value string) error {
 	}
 
 	return nil
+}
+
+func (ic *InfluxContext) Query(host, name string) ([]client.Result, error) {
+	result := []client.Result{}
+
+	command := fmt.Sprintf("SELECT value FROM %s WHERE host='%s'", name, host)
+
+	query := client.Query{
+		Command:  command,
+		Database: ic.database,
+	}
+
+	response, err := ic.client.Query(query)
+	if err != nil {
+		return result, err
+	}
+
+	if response.Error() != nil {
+		return result, response.Error()
+	}
+
+	results := response.Results
+
+	return results, nil
 }

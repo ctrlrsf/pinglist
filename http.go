@@ -7,7 +7,7 @@ import (
 )
 
 // Start HTTP server
-func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry, historyLog *HistoryLog) {
+func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry, influxContext *InfluxContext) {
 	api := rest.NewApi()
 	api.Use(rest.DefaultDevStack...)
 	router, err := rest.MakeRouter(
@@ -52,14 +52,25 @@ func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry, historyLog
 
 			hostRegistry.RemoveHost(address)
 		}},
-		&rest.Route{"GET", "/history/#address", func(w rest.ResponseWriter, r *rest.Request) {
+		&rest.Route{"GET", "/history/#address/status", func(w rest.ResponseWriter, r *rest.Request) {
 			address := r.PathParam("address")
 
-			logEntries := historyLog.GetLogEntryList(address)
+			result, err := influxContext.Query(address, "status")
+			if err != nil {
+				rest.Error(w, "Error getting history", http.StatusInternalServerError)
+			}
 
-			log.Debug("Log entries: %q\n", logEntries)
+			w.WriteJson(result)
+		}},
+		&rest.Route{"GET", "/history/#address/latency", func(w rest.ResponseWriter, r *rest.Request) {
+			address := r.PathParam("address")
 
-			w.WriteJson(logEntries)
+			result, err := influxContext.Query(address, "latency")
+			if err != nil {
+				rest.Error(w, "Error getting history", http.StatusInternalServerError)
+			}
+
+			w.WriteJson(result)
 		}},
 	)
 

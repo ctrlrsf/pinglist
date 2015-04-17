@@ -70,7 +70,7 @@ func main() {
 		ic := NewInfluxContext(c.String("influxurl"))
 		go storePingResults(results, hostRegistry, historyLog, &ic)
 
-		startHTTPServer(c.String("http"), hostRegistry, historyLog)
+		startHTTPServer(c.String("http"), hostRegistry, &ic)
 	}
 
 	app.Run(os.Args)
