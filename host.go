@@ -15,6 +15,17 @@ const (
 	Online  = HostStatus(2)
 )
 
+// NewHostStatus creates new HostStatus from integer value
+func NewHostStatus(i int) HostStatus {
+	switch i {
+	case 1:
+		return Offline
+	case 2:
+		return Online
+	}
+	return Unknown
+}
+
 // String returns the string representation of HostStatus
 func (hs HostStatus) String() string {
 	switch hs {

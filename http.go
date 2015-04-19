@@ -62,11 +62,13 @@ func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry, influxCont
 				return
 			}
 
-			result, err := influxContext.Query(address, metric)
+			result, err := influxContext.Query(address)
 			if err != nil {
 				rest.Error(w, "Error getting history", http.StatusInternalServerError)
 				return
 			}
+
+			resultsToLogEntryList(result)
 
 			w.WriteJson(result)
 		}},

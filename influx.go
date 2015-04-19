@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/influxdb/influxdb/client"
 	"net/url"
@@ -59,11 +60,16 @@ func (ic *InfluxContext) Ping() error {
 	return nil
 }
 
-func (ic *InfluxContext) WritePoint(host, name, value string) error {
+const seriesName = "hostHistory"
+
+func (ic *InfluxContext) WritePoint(host string, status HostStatus, latency time.Duration) error {
+	log.Debug("Writing points: status=%q, latency=%q", status, latency)
+
 	point := client.Point{
-		Name: name,
+		Name: seriesName,
 		Fields: map[string]interface{}{
-			"value": value,
+			"status":  status,
+			"latency": latency,
 		},
 		Tags: map[string]string{
 			"host": host,
@@ -86,10 +92,10 @@ func (ic *InfluxContext) WritePoint(host, name, value string) error {
 	return nil
 }
 
-func (ic *InfluxContext) Query(host, name string) ([]client.Result, error) {
+func (ic *InfluxContext) Query(host string) ([]client.Result, error) {
 	result := []client.Result{}
 
-	command := fmt.Sprintf("SELECT value FROM %s WHERE host='%s'", name, host)
+	command := fmt.Sprintf("SELECT status, latency FROM %s WHERE host='%s'", seriesName, host)
 
 	query := client.Query{
 		Command:  command,
@@ -108,4 +114,47 @@ func (ic *InfluxContext) Query(host, name string) ([]client.Result, error) {
 	results := response.Results
 
 	return results, nil
+}
+
+func resultsToLogEntryList(results []client.Result) []LogEntry {
+	logEntries := []LogEntry{}
+
+	for resultsIndex := range results {
+		result := results[resultsIndex]
+		for seriesIndex := range result.Series {
+			series := result.Series[seriesIndex]
+			log.Debug("Series name: %q", series.Name)
+			log.Debug("Series columns: %q", series.Columns)
+			for valueIndex := range series.Values {
+				value := series.Values[valueIndex]
+
+				t, _ := time.Parse(time.RFC3339, value[0].(string))
+
+				statusJsonNumber := value[1].(json.Number)
+				log.Debug("statusJsonNumber: %q", statusJsonNumber)
+				statusInt64, _ := statusJsonNumber.Int64()
+				log.Debug("statusInt64: %q", statusInt64)
+				status := NewHostStatus(int(statusInt64))
+				log.Debug("status: %q", status)
+
+				latencyDurationJsonNumber := value[2].(json.Number)
+				log.Debug("latencyDurationJsonNumber: %q", latencyDurationJsonNumber)
+				latencyDurationInt64, _ := latencyDurationJsonNumber.Int64()
+				log.Debug("latencyDurationInt64: %q", latencyDurationInt64)
+				latencyDuration := time.Duration(latencyDurationInt64)
+
+				logEntry := LogEntry{
+					Timestamp: t,
+					Status:    status,
+					Latency:   latencyDuration,
+				}
+
+				logEntries = append(logEntries, logEntry)
+			}
+		}
+	}
+
+	log.Debug("logEntries: %q", logEntries)
+
+	return logEntries
 }

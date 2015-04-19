@@ -105,8 +105,7 @@ func storePingResults(results chan Host, hostRegistry *HostRegistry,
 
 		historyLog.AddLogEntry(host.Address, LogEntry{host.Status, host.Latency, time.Now()})
 
-		influxContext.WritePoint(host.Address, "latency", host.Latency.String())
-		influxContext.WritePoint(host.Address, "status", host.Status.String())
+		influxContext.WritePoint(host.Address, host.Status, host.Latency)
 	}
 }
 
