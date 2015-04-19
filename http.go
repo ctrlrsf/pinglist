@@ -52,15 +52,8 @@ func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry, influxCont
 
 			hostRegistry.RemoveHost(address)
 		}},
-		&rest.Route{"GET", "/history/#address/#metric", func(w rest.ResponseWriter, r *rest.Request) {
+		&rest.Route{"GET", "/history/#address", func(w rest.ResponseWriter, r *rest.Request) {
 			address := r.PathParam("address")
-			metric := r.PathParam("metric")
-
-			// Make sure we only accept metrics we can handle
-			if metric != "status" && metric != "latency" {
-				rest.Error(w, "Invalid metric", http.StatusInternalServerError)
-				return
-			}
 
 			result, err := influxContext.Query(address)
 			if err != nil {
@@ -68,9 +61,9 @@ func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry, influxCont
 				return
 			}
 
-			resultsToLogEntryList(result)
+			logEntries := resultsToLogEntryList(result)
 
-			w.WriteJson(result)
+			w.WriteJson(logEntries)
 		}},
 	)
 
