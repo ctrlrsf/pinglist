@@ -116,8 +116,11 @@ func (ic *InfluxContext) Query(host string) ([]client.Result, error) {
 	return results, nil
 }
 
-func resultsToLogEntryList(results []client.Result) []LogEntry {
-	logEntries := []LogEntry{}
+func influxResultsToHistoryLog(results []client.Result) HistoryLog {
+	historyLog := HistoryLog{}
+
+	//historyLog.logEntries = make([]LogEntry, len(results))
+	historyLog.logEntries = []LogEntry{}
 
 	for resultsIndex := range results {
 		result := results[resultsIndex]
@@ -149,12 +152,12 @@ func resultsToLogEntryList(results []client.Result) []LogEntry {
 					Latency:   latencyDuration,
 				}
 
-				logEntries = append(logEntries, logEntry)
+				historyLog.logEntries = append(historyLog.logEntries, logEntry)
 			}
 		}
 	}
 
-	log.Debug("logEntries: %q", logEntries)
+	log.Debug("returning historyLog: %q", historyLog)
 
-	return logEntries
+	return historyLog
 }
