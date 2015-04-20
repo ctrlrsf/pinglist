@@ -61,9 +61,9 @@ func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry, influxCont
 				return
 			}
 
-			logEntries := resultsToLogEntryList(result)
+			historyLog := influxResultsToHistoryLog(result)
 
-			w.WriteJson(logEntries)
+			w.WriteJson(historyLog.logEntries)
 		}},
 	)
 
