@@ -59,8 +59,6 @@ func main() {
 
 		var hostRegistry *HostRegistry = NewHostRegistry()
 
-		var historyLog *HistoryLog = NewHistoryLog()
-
 		pingInterval := time.Duration(c.Int("interval")) * time.Second
 		defaultTimeout := time.Duration(c.Int("timeout")) * time.Second
 
@@ -68,7 +66,7 @@ func main() {
 		go pingLoop(results, hostRegistry, pingInterval, defaultTimeout)
 
 		ic := NewInfluxContext(c.String("influxurl"))
-		go storePingResults(results, hostRegistry, historyLog, &ic)
+		go storePingResults(results, hostRegistry, &ic)
 
 		startHTTPServer(c.String("http"), hostRegistry, &ic)
 	}
@@ -94,7 +92,7 @@ func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Durat
 
 // Store ping results received from results channel
 func storePingResults(results chan Host, hostRegistry *HostRegistry,
-	historyLog *HistoryLog, influxContext *InfluxContext) {
+	influxContext *InfluxContext) {
 
 	for {
 		host := <-results
@@ -102,8 +100,6 @@ func storePingResults(results chan Host, hostRegistry *HostRegistry,
 		log.Info("Storing results for host: %q\n", host)
 
 		hostRegistry.UpdateHost(host)
-
-		historyLog.AddLogEntry(host.Address, LogEntry{host.Status, host.Latency, time.Now()})
 
 		influxContext.WritePoint(host.Address, host.Status, host.Latency)
 	}
