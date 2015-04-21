@@ -5,9 +5,9 @@ import (
 )
 
 type LogEntry struct {
-	Status    HostStatus
-	Latency   time.Duration
-	Timestamp time.Time
+	Status    HostStatus    `json:"status"`
+	Latency   time.Duration `json:"latency"`
+	Timestamp time.Time     `json:"timestamp"`
 }
 
 type HistoryLog struct {
