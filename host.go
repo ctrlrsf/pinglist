@@ -81,6 +81,15 @@ func (hr *HostRegistry) Contains(address string) bool {
 	return ok
 }
 
+// GetHost returns a copy of the Host sruct for host
+func (hr *HostRegistry) GetHost(address string) Host {
+	hr.mutex.RLock()
+	defer hr.mutex.RUnlock()
+
+	host, _ := hr.hosts[address]
+	return host
+}
+
 // UpdateHost updates a host in the registry.
 func (hr *HostRegistry) UpdateHost(host Host) {
 	hr.mutex.Lock()

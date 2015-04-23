@@ -83,7 +83,8 @@ func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Durat
 		log.Info("Pinging these addresses: %q\n", hostAddresses)
 
 		for _, address := range hostAddresses {
-			go pingAddress(results, address, timeout)
+			host := hostRegistry.GetHost(address)
+			go pingAddress(results, host, timeout)
 		}
 
 		time.Sleep(interval)
@@ -106,26 +107,27 @@ func storePingResults(results chan Host, hostRegistry *HostRegistry,
 }
 
 // pingAddress pings a host and sends result down results channel for storage
-func pingAddress(results chan Host, address string, timeout time.Duration) {
-	isUp, rtt, err := pingWithFastping(address, timeout)
+func pingAddress(results chan Host, oldHost Host, timeout time.Duration) {
+	isUp, rtt, err := pingWithFastping(oldHost.Address, timeout)
 
 	if err != nil {
 		log.Error(err.Error())
 	}
 
-	host := Host{}
+	newHost := Host{}
 
-	host.Address = address
+	newHost.Address = oldHost.Address
+	newHost.Description = oldHost.Description
 
 	if isUp {
-		host.Status = Online
-		host.Latency = rtt
+		newHost.Status = Online
+		newHost.Latency = rtt
 	} else {
-		host.Status = Offline
+		newHost.Status = Offline
 	}
-	log.Info("Pinged: address=%q status=%s rtt=%s\n", host.Address, host.Status, host.Latency)
+	log.Info("Pinged: address=%q status=%s rtt=%s\n", newHost.Address, newHost.Status, newHost.Latency)
 
-	results <- host
+	results <- newHost
 }
 
 // pingWithFastping pings a device using the fastping library and determines whether
