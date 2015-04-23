@@ -40,9 +40,10 @@ func (hs HostStatus) String() string {
 // Host holds information about a host that will be pinged, such as
 // IP address or hostname.
 type Host struct {
-	Address, Description string
-	Latency              time.Duration
-	Status               HostStatus
+	Address     string        `json:"address"`
+	Description string        `json:"description"`
+	Latency     time.Duration `json:"latency"`
+	Status      HostStatus    `json:"status"`
 }
 
 // HostRegistry keeps track of Hosts that will be pinged.
