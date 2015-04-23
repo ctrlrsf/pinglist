@@ -59,7 +59,7 @@ var HostList = React.createClass({
       var hostLiNodes = keyList.map(function (key) {
         var host = hostList[key]
         return (
-          <Host key={host.Address} address={host.Address} description={host.Description} status={host.Status} latency={host.Latency} />
+          <Host key={host.address} address={host.address} description={host.description} status={host.status} latency={host.latency} />
         );
       });
 
@@ -200,8 +200,8 @@ var HostAddForm = React.createClass({
     var putUrl = this.props.url + "/" + address
 
     var hostJson = {
-      "Address" : address,
-      "Description" : description,
+      "address" : address,
+      "description" : description,
     }
 
     $.ajax({
