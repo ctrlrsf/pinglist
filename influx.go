@@ -49,6 +49,8 @@ func NewInfluxContext(uri string) InfluxContext {
 	return ic
 }
 
+// Ping pings Influx DB server to get version in case we have to
+// use different client API (v0.8 vs v0.9)
 func (ic *InfluxContext) Ping() error {
 	duration, version, err := ic.client.Ping()
 	if err != nil {
@@ -61,6 +63,7 @@ func (ic *InfluxContext) Ping() error {
 	return nil
 }
 
+// WritePoint writes a host status data point to Influx server
 func (ic *InfluxContext) WritePoint(host string, status HostStatus, latency time.Duration) error {
 	log.Debug("Writing points: status=%q, latency=%q", status, latency)
 
@@ -91,6 +94,7 @@ func (ic *InfluxContext) WritePoint(host string, status HostStatus, latency time
 	return nil
 }
 
+// Query queries Influx DB for all history for a specific host
 func (ic *InfluxContext) Query(host string) ([]client.Result, error) {
 	result := []client.Result{}
 
@@ -115,6 +119,8 @@ func (ic *InfluxContext) Query(host string) ([]client.Result, error) {
 	return results, nil
 }
 
+// influxResultsToHistoryLog converts the Influx DB query results into
+// a HistoryLog data structure that's used by rest of application
 func influxResultsToHistoryLog(results []client.Result) HistoryLog {
 	historyLog := HistoryLog{}
 
