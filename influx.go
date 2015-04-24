@@ -12,6 +12,7 @@ import (
 const (
 	InfluxDatabase        = "pinglist"
 	InfluxRetentionPolicy = "default"
+	PingListSeriesName    = "hostHistory"
 )
 
 type InfluxContext struct {
@@ -60,13 +61,11 @@ func (ic *InfluxContext) Ping() error {
 	return nil
 }
 
-const seriesName = "hostHistory"
-
 func (ic *InfluxContext) WritePoint(host string, status HostStatus, latency time.Duration) error {
 	log.Debug("Writing points: status=%q, latency=%q", status, latency)
 
 	point := client.Point{
-		Name: seriesName,
+		Name: PingListSeriesName,
 		Fields: map[string]interface{}{
 			"status":  status,
 			"latency": latency,
@@ -95,7 +94,7 @@ func (ic *InfluxContext) WritePoint(host string, status HostStatus, latency time
 func (ic *InfluxContext) Query(host string) ([]client.Result, error) {
 	result := []client.Result{}
 
-	command := fmt.Sprintf("SELECT status, latency FROM %s WHERE host='%s'", seriesName, host)
+	command := fmt.Sprintf("SELECT status, latency FROM %s WHERE host='%s'", PingListSeriesName, host)
 
 	query := client.Query{
 		Command:  command,
