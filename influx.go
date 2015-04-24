@@ -119,7 +119,6 @@ func (ic *InfluxContext) Query(host string) ([]client.Result, error) {
 func influxResultsToHistoryLog(results []client.Result) HistoryLog {
 	historyLog := HistoryLog{}
 
-	//historyLog.logEntries = make([]LogEntry, len(results))
 	historyLog.logEntries = []LogEntry{}
 
 	for resultsIndex := range results {
