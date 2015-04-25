@@ -62,13 +62,20 @@ func main() {
 		pingInterval := time.Duration(c.Int("interval")) * time.Second
 		defaultTimeout := time.Duration(c.Int("timeout")) * time.Second
 
+		// Results channel receives Host structs once a host has been
+		// pinged so result can be stored.
 		results := make(chan Host)
+
+		// influxContext contains all information needed to communicate
+		// with Influx DB server. This is needed to store the results
+		// in Influx, and to query results from the REST API.
+		influxContext := NewInfluxContext(c.String("influxurl"))
+
 		go pingLoop(results, hostRegistry, pingInterval, defaultTimeout)
 
-		ic := NewInfluxContext(c.String("influxurl"))
-		go storePingResults(results, hostRegistry, &ic)
+		go storePingResults(results, hostRegistry, &influxContext)
 
-		startHTTPServer(c.String("http"), hostRegistry, &ic)
+		startHTTPServer(c.String("http"), hostRegistry, &influxContext)
 	}
 
 	app.Run(os.Args)
