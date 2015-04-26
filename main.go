@@ -12,10 +12,6 @@ import (
 	"github.com/tatsushid/go-fastping"
 )
 
-type HostJson struct {
-	Address, Description string
-}
-
 var log = logging.MustGetLogger("pinglist")
 
 func main() {

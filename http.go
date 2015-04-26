@@ -6,6 +6,11 @@ import (
 	"github.com/ant0ine/go-json-rest/rest"
 )
 
+type HostJson struct {
+	Address     string `json:"address"`
+	Description string `json:"description"`
+}
+
 // Start HTTP server
 func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry, influxContext *InfluxContext) {
 	api := rest.NewApi()
