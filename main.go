@@ -14,6 +14,13 @@ import (
 
 var log = logging.MustGetLogger("pinglist")
 
+type PinglistConfig struct {
+	pingInterval time.Duration
+	pingTimeout  time.Duration
+	influxUrl    string
+	httpAddr     string
+}
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "pinglist"
@@ -53,29 +60,39 @@ func main() {
 			logging.SetLevel(logging.DEBUG, "pinglist")
 		}
 
-		var hostRegistry *HostRegistry = NewHostRegistry()
+		config := PinglistConfig{
+			pingInterval: time.Duration(c.Int("interval")) * time.Second,
+			pingTimeout:  time.Duration(c.Int("timeout")) * time.Second,
+			influxUrl:    c.String("influxurl"),
+			httpAddr:     c.String("http"),
+		}
 
-		pingInterval := time.Duration(c.Int("interval")) * time.Second
-		defaultTimeout := time.Duration(c.Int("timeout")) * time.Second
-
-		// Results channel receives Host structs once a host has been
-		// pinged so result can be stored.
-		results := make(chan Host)
-
-		// influxContext contains all information needed to communicate
-		// with Influx DB server. This is needed to store the results
-		// in Influx, and to query results from the REST API.
-		influxContext := NewInfluxContext(c.String("influxurl"))
-
-		go pingLoop(results, hostRegistry, pingInterval, defaultTimeout)
-
-		go storePingResults(results, hostRegistry, &influxContext)
-
-		startHTTPServer(c.String("http"), hostRegistry, &influxContext)
+		StartPinglistServer(config)
 	}
 
 	app.Run(os.Args)
+}
 
+// StartPinglistServer runs the main server go routines
+func StartPinglistServer(config PinglistConfig) {
+	// Create the host registry that will keep track of the hosts
+	// that we're pinging.
+	var hostRegistry *HostRegistry = NewHostRegistry()
+
+	// Results channel receives Host structs once a host has been
+	// pinged so result can be stored.
+	results := make(chan Host)
+
+	// influxContext contains all information needed to communicate
+	// with Influx DB server. This is needed to store the results
+	// in Influx, and to query results from the REST API.
+	influxContext := NewInfluxContext(config.influxUrl)
+
+	go pingLoop(results, hostRegistry, config.pingInterval, config.pingTimeout)
+
+	go storePingResults(results, hostRegistry, &influxContext)
+
+	startHTTPServer(config.httpAddr, hostRegistry, &influxContext)
 }
 
 // Ping all hosts and then sleep some amount of time, repeat
