@@ -15,6 +15,8 @@ const (
 	PingListSeriesName    = "hostHistory"
 )
 
+// Store context information for Influx server to assist with new
+// connections and queries.
 type InfluxContext struct {
 	database        string
 	config          client.Config
@@ -23,6 +25,8 @@ type InfluxContext struct {
 	version         string
 }
 
+// NewInfluxContext creates a new Influx context using URL of InfluxDB server
+// and environment variabls for username and password.
 func NewInfluxContext(uri string) InfluxContext {
 	u, err := url.Parse(uri)
 	if err != nil {
