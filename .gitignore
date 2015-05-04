@@ -25,3 +25,6 @@ _testmain.go
 
 # Binary
 pinglist
+
+# Ignore public folder which is generated during every build
+public/

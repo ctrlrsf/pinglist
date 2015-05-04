@@ -79,7 +79,7 @@ func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry, influxCont
 
 	http.Handle("/api/", http.StripPrefix("/api", api.MakeHandler()))
 
-	http.Handle("/", http.FileServer(http.Dir("static/")))
+	http.Handle("/", http.FileServer(http.Dir("public/")))
 
 	log.Fatal(http.ListenAndServe(listenIPPort, nil))
 }
