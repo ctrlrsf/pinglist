@@ -122,7 +122,7 @@ func storePingResults(results chan Host, hostRegistry *HostRegistry,
 
 		hostRegistry.UpdateHost(host)
 
-		influxContext.WritePoint(host.Address, host.Status, host.Latency)
+		influxContext.WritePoint(time.Now(), host.Address, host.Status, host.Latency)
 	}
 }
 

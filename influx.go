@@ -68,7 +68,8 @@ func (ic *InfluxContext) Ping() error {
 }
 
 // WritePoint writes a host status data point to Influx server
-func (ic *InfluxContext) WritePoint(host string, status HostStatus, latency time.Duration) error {
+func (ic *InfluxContext) WritePoint(timestamp time.Time, host string,
+	status HostStatus, latency time.Duration) error {
 	log.Debug("Writing points: status=%q, latency=%q", status, latency)
 
 	point := client.Point{
@@ -80,7 +81,7 @@ func (ic *InfluxContext) WritePoint(host string, status HostStatus, latency time
 		Tags: map[string]string{
 			"host": host,
 		},
-		Timestamp: time.Now(),
+		Timestamp: timestamp,
 		Precision: "s",
 	}
 
