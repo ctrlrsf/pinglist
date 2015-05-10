@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/gob"
 	"net"
 	"regexp"
 	"sync"
@@ -44,6 +46,26 @@ type Host struct {
 	Description string        `json:"description"`
 	Latency     time.Duration `json:"latency"`
 	Status      HostStatus    `json:"status"`
+}
+
+// GobEncode encodes a Host struct into a gob and returns the bytes
+func (h *Host) GobEncode() []byte {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	enc.Encode(h)
+
+	return buf.Bytes()
+}
+
+// GobDecodeHost decodes a Host struct from an array of bytes
+func GobDecodeHost(gobBytes []byte) (Host, error) {
+	buf := bytes.NewBuffer(gobBytes)
+	dec := gob.NewDecoder(buf)
+
+	var h Host
+	err := dec.Decode(&h)
+
+	return h, err
 }
 
 // HostRegistry keeps track of Hosts that will be pinged.

@@ -43,9 +43,22 @@ func (ctx *BoltDbContext) MakeHostsBucket() error {
 func (ctx *BoltDbContext) SaveHost(host Host) {
 	ctx.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(hostsBucketName))
-		err := b.Put([]byte(host.Address), []byte(host.Description))
+		err := b.Put([]byte(host.Address), host.GobEncode())
 		return err
 	})
+}
+
+// GetHost retrieves a host from the boltdb file
+func (ctx *BoltDbContext) GetHost(address string) Host {
+	var h Host
+	ctx.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(hostsBucketName))
+		gobBytes := b.Get([]byte(address))
+		var err error
+		h, err = GobDecodeHost(gobBytes)
+		return err
+	})
+	return h
 }
 
 // DeleteHost removes a host in the boltdb file
