@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/boltdb/bolt"
 )
 
@@ -59,6 +60,28 @@ func (ctx *BoltDbContext) GetHost(address string) Host {
 		return err
 	})
 	return h
+}
+
+// GetAllHosts retrieves all hosts from the boltdb file
+func (ctx *BoltDbContext) GetAllHosts() []Host {
+	hosts := make([]Host, 0)
+
+	ctx.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(hostsBucketName))
+		c := b.Cursor()
+
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			host, err := GobDecodeHost(v)
+			if err != nil {
+				fmt.Printf("Error decoding host: %v", err)
+				continue
+			}
+			hosts = append(hosts, host)
+		}
+		return nil
+	})
+
+	return hosts
 }
 
 // DeleteHost removes a host in the boltdb file

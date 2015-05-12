@@ -8,14 +8,24 @@ import (
 func TestSaveHostToBolt(t *testing.T) {
 	tempFile := os.TempDir() + "/" + "host.db"
 
-	testHost := Host{
-		Address:     "127.0.0.1",
-		Description: "localhost",
+	testHosts := []Host{
+		{
+			Address:     "127.0.0.1",
+			Description: "localhost",
+		},
+		{
+			Address:     "8.8.8.8",
+			Description: "google",
+		},
 	}
 
 	ctx := NewBoltDbContext(tempFile)
 	ctx.MakeHostsBucket()
-	ctx.SaveHost(testHost)
+
+	// Save all test hosts
+	for i := range testHosts {
+		ctx.SaveHost(testHosts[i])
+	}
 
 	savedHost := ctx.GetHost("127.0.0.1")
 	t.Logf("Retrieved host: %q", savedHost)
@@ -24,6 +34,12 @@ func TestSaveHostToBolt(t *testing.T) {
 		t.Error("Retrieved Host struct is not what was saved: %q", savedHost)
 	}
 
-	ctx.DeleteHost(testHost.Address)
+	allHosts := ctx.GetAllHosts()
+	t.Logf("Size of allHosts: %d\n", len(allHosts))
+	for _, v := range allHosts {
+		t.Logf("Host: %v", v)
+	}
+
+	ctx.DeleteHost(testHosts[0].Address)
 	ctx.Close()
 }
