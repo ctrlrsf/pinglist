@@ -51,7 +51,7 @@ func (ctx *BoltDbContext) SaveHost(host Host) {
 // GetHost retrieves a host from the boltdb file
 func (ctx *BoltDbContext) GetHost(address string) Host {
 	var h Host
-	ctx.db.Update(func(tx *bolt.Tx) error {
+	ctx.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(hostsBucketName))
 		gobBytes := b.Get([]byte(address))
 		var err error
