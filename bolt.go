@@ -88,10 +88,12 @@ func (ctx *BoltDbContext) GetAllHosts() ([]Host, error) {
 }
 
 // DeleteHost removes a host in the boltdb file
-func (ctx *BoltDbContext) DeleteHost(address string) {
-	ctx.db.Update(func(tx *bolt.Tx) error {
+func (ctx *BoltDbContext) DeleteHost(address string) error {
+	err := ctx.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(hostsBucketName))
 		err := b.Delete([]byte(address))
 		return err
 	})
+
+	return err
 }

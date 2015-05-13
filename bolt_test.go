@@ -55,6 +55,9 @@ func TestSaveHostToBolt(t *testing.T) {
 		t.Logf("Host: %v", v)
 	}
 
-	ctx.DeleteHost(testHosts[0].Address)
+	deleteErr := ctx.DeleteHost(testHosts[0].Address)
+	if deleteErr != nil {
+		t.Errorf("DeleteHost returned non-nil error: %v\n", deleteErr)
+	}
 	ctx.Close()
 }
