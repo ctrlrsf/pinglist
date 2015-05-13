@@ -41,8 +41,8 @@ func (ctx *BoltDbContext) MakeHostsBucket() error {
 }
 
 // SaveHost saves a host in the boltdb file
-func (ctx *BoltDbContext) SaveHost(host Host) {
-	ctx.db.Update(func(tx *bolt.Tx) error {
+func (ctx *BoltDbContext) SaveHost(host Host) error {
+	return ctx.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(hostsBucketName))
 		err := b.Put([]byte(host.Address), host.GobEncode())
 		return err
