@@ -24,11 +24,11 @@ func TestSaveHostToBolt(t *testing.T) {
 
 	badHost, err := ctx.GetHost("8.9.9.9")
 	if badHost != nil {
-		t.Errorf("GetHost returned non-nil pointer for host that doesn't exist: %v", badHost)
+		t.Errorf("GetHost returned non-nil pointer for host that doesn't exist: %v\n", badHost)
 	}
 
 	if err == nil {
-		t.Errorf("GetHost returned nil error for host that doesn't exist: %v", err)
+		t.Errorf("GetHost returned nil error for host that doesn't exist: %v\n", err)
 	}
 
 	// Save all test hosts
@@ -46,7 +46,10 @@ func TestSaveHostToBolt(t *testing.T) {
 		t.Error("Retrieved Host struct is not what was saved: %q", savedHost)
 	}
 
-	allHosts := ctx.GetAllHosts()
+	allHosts, err := ctx.GetAllHosts()
+	if err != nil {
+		t.Errorf("GetAllHosts returned non-nil error: %v\n", err)
+	}
 	t.Logf("Size of allHosts: %d\n", len(allHosts))
 	for _, v := range allHosts {
 		t.Logf("Host: %v", v)
