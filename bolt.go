@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/boltdb/bolt"
 )
@@ -50,16 +51,20 @@ func (ctx *BoltDbContext) SaveHost(host Host) error {
 }
 
 // GetHost retrieves a host from the boltdb file
-func (ctx *BoltDbContext) GetHost(address string) Host {
-	var h Host
+func (ctx *BoltDbContext) GetHost(address string) (*Host, error) {
+	var hostBytes []byte
 	ctx.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(hostsBucketName))
-		gobBytes := b.Get([]byte(address))
-		var err error
-		h, err = GobDecodeHost(gobBytes)
-		return err
+		hostBytes = b.Get([]byte(address))
+		return nil
 	})
-	return h
+
+	if hostBytes == nil {
+		return nil, errors.New("Host not found.")
+	}
+
+	host, err := GobDecodeHost(hostBytes)
+	return &host, err
 }
 
 // GetAllHosts retrieves all hosts from the boltdb file

@@ -22,12 +22,24 @@ func TestSaveHostToBolt(t *testing.T) {
 	ctx := NewBoltDbContext(tempFile)
 	ctx.MakeHostsBucket()
 
+	badHost, err := ctx.GetHost("8.9.9.9")
+	if badHost != nil {
+		t.Errorf("GetHost returned non-nil pointer for host that doesn't exist: %v", badHost)
+	}
+
+	if err == nil {
+		t.Errorf("GetHost returned nil error for host that doesn't exist: %v", err)
+	}
+
 	// Save all test hosts
 	for i := range testHosts {
 		ctx.SaveHost(testHosts[i])
 	}
 
-	savedHost := ctx.GetHost("127.0.0.1")
+	savedHost, err := ctx.GetHost("127.0.0.1")
+	if err != nil {
+		t.Errorf("GetHost returned non-nil error: %v", err)
+	}
 	t.Logf("Retrieved host: %q", savedHost)
 
 	if savedHost.Description != "localhost" {
