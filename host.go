@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/gob"
+	"fmt"
 	"net"
 	"regexp"
 	"sync"
@@ -70,8 +71,9 @@ func GobDecodeHost(gobBytes []byte) (Host, error) {
 
 // HostRegistry keeps track of Hosts that will be pinged.
 type HostRegistry struct {
-	mutex *sync.RWMutex
-	hosts map[string]Host
+	mutex     *sync.RWMutex
+	hosts     map[string]Host
+	boltDbCtx *BoltDbContext
 }
 
 // NewHostRegistry returns new HostRegistry where hosts can later be added.
@@ -79,18 +81,19 @@ func NewHostRegistry() *HostRegistry {
 	hr := &HostRegistry{}
 	hr.mutex = &sync.RWMutex{}
 	hr.hosts = make(map[string]Host)
+	hr.boltDbCtx = NewBoltDbContext(defaultHostDbFile)
 	return hr
 }
 
 // RegisterHost adds a host to the registry
-func (hr *HostRegistry) RegisterHost(h *Host) {
+func (hr *HostRegistry) RegisterHost(h Host) {
 	// Don't add duplicate address, just return if already exists.
 	if hr.Contains(h.Address) {
 		return
 	}
 
 	hr.mutex.Lock()
-	hr.hosts[h.Address] = *h
+	hr.boltDbCtx.SaveHost(h)
 	hr.mutex.Unlock()
 }
 
@@ -99,17 +102,21 @@ func (hr *HostRegistry) Contains(address string) bool {
 	hr.mutex.RLock()
 	defer hr.mutex.RUnlock()
 
-	_, ok := hr.hosts[address]
-	return ok
+	_, err := hr.boltDbCtx.GetHost(address)
+	if err == nil {
+		return true
+	}
+	return false
 }
 
 // GetHost returns a copy of the Host sruct for host
-func (hr *HostRegistry) GetHost(address string) Host {
+func (hr *HostRegistry) GetHost(address string) (Host, error) {
 	hr.mutex.RLock()
 	defer hr.mutex.RUnlock()
 
-	host, _ := hr.hosts[address]
-	return host
+	host, err := hr.boltDbCtx.GetHost(address)
+
+	return *host, err
 }
 
 // UpdateHost updates a host in the registry.
@@ -119,8 +126,8 @@ func (hr *HostRegistry) UpdateHost(host Host) {
 	// Only store new host if key already exists. Possible that host was deleted
 	// while a ping for that host was already in progress. This confirms host is
 	// still valid before storing.
-	if _, ok := hr.hosts[host.Address]; ok {
-		hr.hosts[host.Address] = host
+	if hr.Contains(host.Address) {
+		hr.boltDbCtx.SaveHost(host)
 	}
 	hr.mutex.Unlock()
 	log.Debug("HostRegistry.Hosts = %q\n", hr.hosts)
@@ -131,20 +138,25 @@ func (hr *HostRegistry) RemoveHost(address string) {
 	hr.mutex.Lock()
 	defer hr.mutex.Unlock()
 
-	delete(hr.hosts, address)
+	hr.boltDbCtx.DeleteHost(address)
 }
 
 // GetHostAddresses returns map of hosts
 func (hr *HostRegistry) GetHostAddresses() []string {
-	list := make([]string, 0)
+	addressList := make([]string, 0)
 
 	hr.mutex.RLock()
-	for key, _ := range hr.hosts {
-		list = append(list, key)
+	allHosts, err := hr.boltDbCtx.GetAllHosts()
+	if err != nil {
+		fmt.Println("Error getting all hosts.")
+	}
+
+	for idx, _ := range allHosts {
+		addressList = append(addressList, allHosts[idx].Address)
 	}
 	hr.mutex.RUnlock()
 
-	return list
+	return addressList
 }
 
 // ValidIPOrHost validates address is an IP or hostname

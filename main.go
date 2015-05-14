@@ -103,7 +103,11 @@ func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Durat
 		log.Info("Pinging these addresses: %q\n", hostAddresses)
 
 		for _, address := range hostAddresses {
-			host := hostRegistry.GetHost(address)
+			host, err := hostRegistry.GetHost(address)
+			if err != nil {
+				log.Warning("GetHost() returned error=%v for address=%v", err, address)
+			}
+
 			go pingAddress(results, host, timeout)
 		}
 

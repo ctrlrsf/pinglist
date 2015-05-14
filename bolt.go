@@ -22,6 +22,8 @@ func NewBoltDbContext(fileName string) *BoltDbContext {
 		log.Fatal(err)
 	}
 
+	ctx.MakeHostsBucket()
+
 	return &ctx
 }
 
@@ -35,7 +37,7 @@ func (ctx *BoltDbContext) Close() {
 func (ctx *BoltDbContext) MakeHostsBucket() error {
 	var err error
 	return ctx.db.Update(func(tx *bolt.Tx) error {
-		_, err = tx.CreateBucket([]byte(hostsBucketName))
+		_, err = tx.CreateBucketIfNotExists([]byte(hostsBucketName))
 		return err
 	})
 }
@@ -63,7 +65,11 @@ func (ctx *BoltDbContext) GetHost(address string) (*Host, error) {
 	}
 
 	host, err := GobDecodeHost(hostBytes)
-	return &host, err
+	if err != nil {
+		return nil, errors.New("Error decoding host")
+	}
+
+	return &host, nil
 }
 
 // GetAllHosts retrieves all hosts from the boltdb file

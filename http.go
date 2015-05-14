@@ -44,7 +44,7 @@ func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry, influxCont
 				return
 			}
 
-			h := &Host{Address: hostJson.Address, Description: hostJson.Description}
+			h := Host{Address: hostJson.Address, Description: hostJson.Description}
 			hostRegistry.RegisterHost(h)
 		}},
 		&rest.Route{"DELETE", "/hosts/#address", func(w rest.ResponseWriter, r *rest.Request) {
