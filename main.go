@@ -103,6 +103,8 @@ func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Durat
 		log.Info("Pinging these addresses: %q\n", hostAddresses)
 
 		for _, address := range hostAddresses {
+			log.Debug("Pinging: %v\n", address)
+
 			host, err := hostRegistry.GetHost(address)
 			if err != nil {
 				log.Warning("GetHost() returned error=%v for address=%v", err, address)
@@ -111,6 +113,7 @@ func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Durat
 			go pingAddress(results, host, timeout)
 		}
 
+		log.Debug("Started pings for all hosts. Sleeping for: %v", interval)
 		time.Sleep(interval)
 	}
 }

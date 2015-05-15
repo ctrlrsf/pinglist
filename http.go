@@ -17,9 +17,7 @@ func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry, influxCont
 	api.Use(rest.DefaultDevStack...)
 	router, err := rest.MakeRouter(
 		&rest.Route{"GET", "/hosts", func(w rest.ResponseWriter, r *rest.Request) {
-			hostRegistry.mutex.RLock()
 			w.WriteJson(&hostRegistry.hosts)
-			hostRegistry.mutex.RUnlock()
 		}},
 		&rest.Route{"PUT", "/hosts/#address", func(w rest.ResponseWriter, r *rest.Request) {
 			hostJson := HostJson{}
