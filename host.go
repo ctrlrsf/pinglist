@@ -71,7 +71,6 @@ func GobDecodeHost(gobBytes []byte) (Host, error) {
 // HostRegistry keeps track of Hosts that will be pinged.
 type HostRegistry struct {
 	boltDbFile string
-	hosts      map[string]Host
 	boltDbCtx  *BoltDbContext
 }
 
@@ -79,7 +78,6 @@ type HostRegistry struct {
 func NewHostRegistry(boltDbFile string) *HostRegistry {
 	hr := &HostRegistry{}
 	hr.boltDbFile = boltDbFile
-	hr.hosts = make(map[string]Host)
 	return hr
 }
 
@@ -127,7 +125,6 @@ func (hr *HostRegistry) UpdateHost(host Host) {
 		hr.boltDbCtx.SaveHost(host)
 		hr.boltDbCtx.Close()
 	}
-	log.Debug("HostRegistry.Hosts = %q\n", hr.hosts)
 }
 
 // RemoveHost removes a host from the registry.
@@ -137,7 +134,7 @@ func (hr *HostRegistry) RemoveHost(address string) {
 	hr.boltDbCtx.Close()
 }
 
-// GetHostAddresses returns map of hosts
+// GetHostAddresses returns list of all host addresses
 func (hr *HostRegistry) GetHostAddresses() []string {
 	addressList := make([]string, 0)
 
@@ -154,6 +151,23 @@ func (hr *HostRegistry) GetHostAddresses() []string {
 	}
 
 	return addressList
+}
+
+// GetAllHosts returns a map of all hosts
+func (hr *HostRegistry) GetAllHosts() map[string]Host {
+	allHostsMap := make(map[string]Host)
+
+	allAddresses := hr.GetHostAddresses()
+	for _, address := range allAddresses {
+		host, err := hr.GetHost(address)
+		if err != nil {
+			log.Warning("Unable to add host %v to map due to error: %v", address, err)
+		}
+
+		allHostsMap[address] = host
+	}
+
+	return allHostsMap
 }
 
 // ValidIPOrHost validates address is an IP or hostname
