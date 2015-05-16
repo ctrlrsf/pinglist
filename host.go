@@ -70,13 +70,15 @@ func GobDecodeHost(gobBytes []byte) (Host, error) {
 
 // HostRegistry keeps track of Hosts that will be pinged.
 type HostRegistry struct {
-	hosts     map[string]Host
-	boltDbCtx *BoltDbContext
+	boltDbFile string
+	hosts      map[string]Host
+	boltDbCtx  *BoltDbContext
 }
 
 // NewHostRegistry returns new HostRegistry where hosts can later be added.
-func NewHostRegistry() *HostRegistry {
+func NewHostRegistry(boltDbFile string) *HostRegistry {
 	hr := &HostRegistry{}
+	hr.boltDbFile = boltDbFile
 	hr.hosts = make(map[string]Host)
 	return hr
 }
@@ -88,7 +90,7 @@ func (hr *HostRegistry) RegisterHost(h Host) {
 		return
 	}
 
-	hr.boltDbCtx = NewBoltDbContext(defaultHostDbFile)
+	hr.boltDbCtx = NewBoltDbContext(hr.boltDbFile)
 	hr.boltDbCtx.SaveHost(h)
 	hr.boltDbCtx.Close()
 }
@@ -96,7 +98,7 @@ func (hr *HostRegistry) RegisterHost(h Host) {
 // Contains checks if host list already contains a host entry with same address.
 func (hr *HostRegistry) Contains(address string) bool {
 
-	hr.boltDbCtx = NewBoltDbContext(defaultHostDbFile)
+	hr.boltDbCtx = NewBoltDbContext(hr.boltDbFile)
 	_, err := hr.boltDbCtx.GetHost(address)
 	hr.boltDbCtx.Close()
 
@@ -108,7 +110,7 @@ func (hr *HostRegistry) Contains(address string) bool {
 
 // GetHost returns a copy of the Host sruct for host
 func (hr *HostRegistry) GetHost(address string) (Host, error) {
-	hr.boltDbCtx = NewBoltDbContext(defaultHostDbFile)
+	hr.boltDbCtx = NewBoltDbContext(hr.boltDbFile)
 	host, err := hr.boltDbCtx.GetHost(address)
 	hr.boltDbCtx.Close()
 
@@ -121,7 +123,7 @@ func (hr *HostRegistry) UpdateHost(host Host) {
 	// while a ping for that host was already in progress. This confirms host is
 	// still valid before storing.
 	if hr.Contains(host.Address) {
-		hr.boltDbCtx = NewBoltDbContext(defaultHostDbFile)
+		hr.boltDbCtx = NewBoltDbContext(hr.boltDbFile)
 		hr.boltDbCtx.SaveHost(host)
 		hr.boltDbCtx.Close()
 	}
@@ -130,7 +132,7 @@ func (hr *HostRegistry) UpdateHost(host Host) {
 
 // RemoveHost removes a host from the registry.
 func (hr *HostRegistry) RemoveHost(address string) {
-	hr.boltDbCtx = NewBoltDbContext(defaultHostDbFile)
+	hr.boltDbCtx = NewBoltDbContext(hr.boltDbFile)
 	hr.boltDbCtx.DeleteHost(address)
 	hr.boltDbCtx.Close()
 }
@@ -139,7 +141,7 @@ func (hr *HostRegistry) RemoveHost(address string) {
 func (hr *HostRegistry) GetHostAddresses() []string {
 	addressList := make([]string, 0)
 
-	hr.boltDbCtx = NewBoltDbContext(defaultHostDbFile)
+	hr.boltDbCtx = NewBoltDbContext(hr.boltDbFile)
 	allHosts, err := hr.boltDbCtx.GetAllHosts()
 	hr.boltDbCtx.Close()
 

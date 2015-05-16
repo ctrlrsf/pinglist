@@ -1,9 +1,14 @@
 package main
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func TestHostRegistryContains(t *testing.T) {
-	hr := NewHostRegistry()
+	testDbFile := os.TempDir() + "/" + "test_host_registry.db"
+
+	hr := NewHostRegistry(testDbFile)
 
 	ip := "1.1.1.1"
 	hr.RegisterHost(Host{Address: ip})

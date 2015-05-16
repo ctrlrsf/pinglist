@@ -77,7 +77,7 @@ func main() {
 func StartPinglistServer(config PinglistConfig) {
 	// Create the host registry that will keep track of the hosts
 	// that we're pinging.
-	var hostRegistry *HostRegistry = NewHostRegistry()
+	var hostRegistry *HostRegistry = NewHostRegistry(defaultHostDbFile)
 
 	// Results channel receives Host structs once a host has been
 	// pinged so result can be stored.
