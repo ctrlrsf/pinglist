@@ -6,7 +6,9 @@ import (
 )
 
 func TestSaveHostToBolt(t *testing.T) {
-	tempFile := os.TempDir() + "/" + "host.db"
+	testDbFile := os.TempDir() + "/" + "test_host.db"
+
+	t.Logf("Using test DB file: %v", testDbFile)
 
 	testHosts := []Host{
 		{
@@ -19,7 +21,7 @@ func TestSaveHostToBolt(t *testing.T) {
 		},
 	}
 
-	ctx := NewBoltDbContext(tempFile)
+	ctx := NewBoltDbContext(testDbFile)
 	ctx.MakeHostsBucket()
 
 	badHost, err := ctx.GetHost("8.9.9.9")
