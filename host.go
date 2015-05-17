@@ -48,6 +48,10 @@ type Host struct {
 	Status      HostStatus    `json:"status"`
 }
 
+// AddressHostMap is a map of hostname addresses to Host struct. This
+// gets serialized into Json for REST API
+type AddressHostMap map[string]Host
+
 // GobEncode encodes a Host struct into a gob and returns the bytes
 func (h *Host) GobEncode() []byte {
 	var buf bytes.Buffer
@@ -153,9 +157,9 @@ func (hr *HostRegistry) GetHostAddresses() []string {
 	return addressList
 }
 
-// GetAllHosts returns a map of all hosts
-func (hr *HostRegistry) GetAllHosts() map[string]Host {
-	allHostsMap := make(map[string]Host)
+// GetAllHosts returns all hosts in an AddressHostMap variable
+func (hr *HostRegistry) GetAllHosts() AddressHostMap {
+	allHostsMap := make(AddressHostMap)
 
 	allAddresses := hr.GetHostAddresses()
 	for _, address := range allAddresses {
