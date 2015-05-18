@@ -39,8 +39,9 @@ func (hs HostStatus) String() string {
 	return "Unknown"
 }
 
-// Host holds information about a host that will be pinged, such as
-// IP address or hostname.
+// Host struct is the main struct that holds information about
+// a pending or completed ping test. This struct is used
+// to save and retrieve results to and from a database.
 type Host struct {
 	Address     string        `json:"address"`
 	Description string        `json:"description"`
