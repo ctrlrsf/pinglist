@@ -28,3 +28,6 @@ pinglist
 
 # Ignore public folder which is generated during every build
 public/
+
+# Ignore host.db file
+host.db
