@@ -19,6 +19,7 @@ type PinglistConfig struct {
 	pingTimeout  time.Duration
 	influxUrl    string
 	httpAddr     string
+	hostDbFile   string
 }
 
 func main() {
@@ -53,6 +54,11 @@ func main() {
 			Value: "http://localhost:8086",
 			Usage: "URL to InfluxDB server",
 		},
+		cli.StringFlag{
+			Name:  "hostdbfile",
+			Value: defaultHostDbFile,
+			Usage: "Specify host database file",
+		},
 	}
 
 	app.Action = func(c *cli.Context) {
@@ -65,6 +71,7 @@ func main() {
 			pingTimeout:  time.Duration(c.Int("timeout")) * time.Second,
 			influxUrl:    c.String("influxurl"),
 			httpAddr:     c.String("http"),
+			hostDbFile:   c.String("hostDbFile"),
 		}
 
 		StartPinglistServer(config)
@@ -77,7 +84,7 @@ func main() {
 func StartPinglistServer(config PinglistConfig) {
 	// Create the host registry that will keep track of the hosts
 	// that we're pinging.
-	var hostRegistry *HostRegistry = NewHostRegistry(defaultHostDbFile)
+	var hostRegistry *HostRegistry = NewHostRegistry(config.hostDbFile)
 
 	// Results channel receives Host structs once a host has been
 	// pinged so result can be stored.
