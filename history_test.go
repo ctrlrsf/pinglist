@@ -23,7 +23,11 @@ func TestHistoryLog(t *testing.T) {
 	hl := HistoryLog{}
 
 	for i := range fakeResults {
-		le := NewLogEntry(fakeResults[i].status, fakeResults[i].latency, time.Now())
+		le := LogEntry{
+			fakeResults[i].status,
+			fakeResults[i].latency,
+			time.Now(),
+		}
 		hl.AddLogEntry(le)
 	}
 

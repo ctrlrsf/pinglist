@@ -14,11 +14,6 @@ type HistoryLog struct {
 	logEntries []LogEntry
 }
 
-// NewLogEntry creates and returns a new LogEntry object
-func NewLogEntry(status HostStatus, latency time.Duration, timestamp time.Time) LogEntry {
-	return LogEntry{status, latency, timestamp}
-}
-
 // AddLogEntry adds a log entry to history log for a host
 func (h *HistoryLog) AddLogEntry(logEntry LogEntry) {
 	h.logEntries = append(h.logEntries, logEntry)
