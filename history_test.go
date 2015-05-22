@@ -20,7 +20,7 @@ func TestHistoryLog(t *testing.T) {
 		{"127.0.0.1", Offline, time.Second * 1},
 	}
 
-	hl := NewHistoryLog()
+	hl := HistoryLog{}
 
 	for i := range fakeResults {
 		le := NewLogEntry(fakeResults[i].status, fakeResults[i].latency, time.Now())
