@@ -38,6 +38,7 @@ func TestSaveHostToBolt(t *testing.T) {
 		ctx.SaveHost(testHosts[i])
 	}
 
+	// Test that we can retrieve a saved host
 	savedHost, err := ctx.GetHost("127.0.0.1")
 	if err != nil {
 		t.Errorf("GetHost returned non-nil error: %v", err)
@@ -48,6 +49,7 @@ func TestSaveHostToBolt(t *testing.T) {
 		t.Error("Retrieved Host struct is not what was saved: %q", savedHost)
 	}
 
+	// Test that we can get all hosts
 	allHosts, err := ctx.GetAllHosts()
 	if err != nil {
 		t.Errorf("GetAllHosts returned non-nil error: %v\n", err)
@@ -57,6 +59,7 @@ func TestSaveHostToBolt(t *testing.T) {
 		t.Logf("Host: %v", v)
 	}
 
+	// Test that we can delete a host
 	deleteErr := ctx.DeleteHost(testHosts[0].Address)
 	if deleteErr != nil {
 		t.Errorf("DeleteHost returned non-nil error: %v\n", deleteErr)
