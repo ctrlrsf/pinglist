@@ -28,6 +28,7 @@ func main() {
 	app.Author = "Rene Fragoso"
 	app.Email = "ctrlrsf@gmail.com"
 	app.Usage = "Pinglist server"
+	app.Version = "0.0.1"
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
