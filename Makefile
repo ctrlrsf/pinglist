@@ -17,6 +17,7 @@ build-js:
 
 .PHONY: clean
 clean:
+	rm -rf public
 	rm -f $(PINGLIST_BINARY)
 
 .PHONY: test
