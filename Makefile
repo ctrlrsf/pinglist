@@ -11,8 +11,7 @@ build:
 
 .PHONY: build-js
 build-js:
-	rm -rf public
-	cp -a static public
+	cp -a ./static/ ./public
 	jsx static/ public/
 
 .PHONY: clean
