@@ -9,8 +9,14 @@ Simple HTTP based server to ping list of hosts
 
 ## Building
 
+Just run `make`. Sample build output below.
+
 ```
 $ make
+"go" build -race
+cp -a ./static/ ./public
+jsx static/ public/
+["app"]
 ```
 
 ## Usage
