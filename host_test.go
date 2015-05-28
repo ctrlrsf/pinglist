@@ -25,7 +25,6 @@ func TestHostRegistryContains(t *testing.T) {
 
 func TestValidIpOrHost(t *testing.T) {
 	validHosts := []string{"1.1.1.1", "2.2.2.2", "google.com", "apple.com"}
-	invalidHosts := []string{"./4.2423", "x$yz", "28 42klkfjs"}
 
 	for i := range validHosts {
 		host := validHosts[i]
@@ -34,6 +33,10 @@ func TestValidIpOrHost(t *testing.T) {
 			t.Error("ValidIPOrHost(%v) returned false, wanted true.", host)
 		}
 	}
+}
+
+func TestInvalidIpOrHost(t *testing.T) {
+	invalidHosts := []string{"./4.2423", "x$yz", "28 42klkfjs"}
 
 	for i := range invalidHosts {
 		host := invalidHosts[i]
