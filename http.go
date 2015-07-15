@@ -12,7 +12,7 @@ type HostJson struct {
 }
 
 // Start HTTP server
-func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry, influxContext *InfluxContext) {
+func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry) {
 	api := rest.NewApi()
 	api.Use(rest.DefaultDevStack...)
 	router, err := rest.MakeRouter(
@@ -54,19 +54,6 @@ func startHTTPServer(listenIPPort string, hostRegistry *HostRegistry, influxCont
 			}
 
 			hostRegistry.RemoveHost(address)
-		}},
-		&rest.Route{"GET", "/history/#address", func(w rest.ResponseWriter, r *rest.Request) {
-			address := r.PathParam("address")
-
-			result, err := influxContext.Query(address)
-			if err != nil {
-				rest.Error(w, "Error getting history", http.StatusInternalServerError)
-				return
-			}
-
-			historyLog := influxResultsToHistoryLog(result)
-
-			w.WriteJson(historyLog.logEntries)
 		}},
 	)
 

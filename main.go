@@ -17,7 +17,6 @@ var log = logging.MustGetLogger("pinglist")
 type PinglistConfig struct {
 	pingInterval time.Duration
 	pingTimeout  time.Duration
-	influxUrl    string
 	httpAddr     string
 	hostDbFile   string
 }
@@ -51,11 +50,6 @@ func main() {
 			Usage: "Enable debug output",
 		},
 		cli.StringFlag{
-			Name:  "influxurl",
-			Value: "http://localhost:8086",
-			Usage: "URL to InfluxDB server",
-		},
-		cli.StringFlag{
 			Name:  "hostdbfile",
 			Value: defaultHostDbFile,
 			Usage: "Specify host database file",
@@ -70,9 +64,8 @@ func main() {
 		config := PinglistConfig{
 			pingInterval: time.Duration(c.Int("interval")) * time.Second,
 			pingTimeout:  time.Duration(c.Int("timeout")) * time.Second,
-			influxUrl:    c.String("influxurl"),
 			httpAddr:     c.String("http"),
-			hostDbFile:   c.String("hostDbFile"),
+			hostDbFile:   c.String("hostdbfile"),
 		}
 
 		StartPinglistServer(config)
@@ -91,16 +84,11 @@ func StartPinglistServer(config PinglistConfig) {
 	// pinged so result can be stored.
 	results := make(chan Host)
 
-	// influxContext contains all information needed to communicate
-	// with Influx DB server. This is needed to store the results
-	// in Influx, and to query results from the REST API.
-	influxContext := NewInfluxContext(config.influxUrl)
-
 	go pingLoop(results, hostRegistry, config.pingInterval, config.pingTimeout)
 
-	go storePingResults(results, hostRegistry, &influxContext)
+	go storePingResults(results, hostRegistry)
 
-	startHTTPServer(config.httpAddr, hostRegistry, &influxContext)
+	startHTTPServer(config.httpAddr, hostRegistry)
 }
 
 // Ping all hosts and then sleep some amount of time, repeat
@@ -127,17 +115,13 @@ func pingLoop(results chan Host, hostRegistry *HostRegistry, interval time.Durat
 }
 
 // Store ping results received from results channel
-func storePingResults(results chan Host, hostRegistry *HostRegistry,
-	influxContext *InfluxContext) {
-
+func storePingResults(results chan Host, hostRegistry *HostRegistry) {
 	for {
 		host := <-results
 
 		log.Info("Storing results for host: %q\n", host)
 
 		hostRegistry.UpdateHost(host)
-
-		influxContext.WritePoint(time.Now(), host.Address, host.Status, host.Latency)
 	}
 }
 
